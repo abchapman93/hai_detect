@@ -1,0 +1,2 @@
+Lex	Type	Regex	Direction	Codes
+uti	UTI	\b(uti|urinary tract infections?)\b		     

@@ -1,0 +1,2 @@
+Lex	Type	Regex	Direction	Codes
+no evidence of	DEFINITE_NEGATED_EXISTENCE	(no|without)\s((definite|other|definitive|secondary|indirect)\s)?(evidence\s(of|for)	forward	
