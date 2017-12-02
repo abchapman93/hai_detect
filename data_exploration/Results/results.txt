@@ -1,0 +1,7 @@
+Total number of patients in table `epic_notes`: 2089
+Total number of notes in table `epic_notes`: 52429
+Total number of patients with notes within 30 days of an operation: 1336
+Total number of notes within 30 days: 32831
+Total number of patients with notes within 30 days of an operation with HAI: 76
+Total number of notes within 30 days with HAI: 3371
+Percentage of patients in chort with HAI: 5.688622754491018%
