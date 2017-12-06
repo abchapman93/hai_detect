@@ -20,6 +20,12 @@ class ClinicalTextDocument(object):
         self.preprocessed_text = self.preprocess(text)
         self.split_text_and_spans = None
 
+        # Split into sentences
+        # While maintaining the original text spans
+        sentences, word_spans, sentence_spans = self.split_sentences(self.preprocessed_text, self.raw_text_spans)
+        self.sentences = sentences
+        self.word_spans = word_spans
+        self.sentence_spans = sentence_spans
 
 
     def get_text_spans(self, text):
