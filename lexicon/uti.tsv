@@ -1,2 +1,4 @@
-Lex	Type	Regex	Direction	Codes
-uti	UTI	\b(uti|urinary tract infections?)\b		     
+Lex	Type	Regex	Direction	Codes	     
+urinary tract infect	URINARY TRACT INFECTION	
+urinary tract infection	URINARY TRACT INFECTION	\burinary( tract)? infect(ion)?s?\b	
+uti	URINARY TRACT INFECTION	\butis?\b	

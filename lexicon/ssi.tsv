@@ -1,2 +1,11 @@
-Lex	Type	Regex	Direction	Codes
-abscess	ORGAN/SPACE SSI	\babscess\b		     
+Lex	Type	Regex	Direction
+abscess	SURGICAL SITE INFECTION	\babscess(es)*\b	
+infected fluid	SURGICAL SITE INFECTION	\binfected fluids?\b	
+superficial surgical site infection	SURGICAL SITE INFECTION	\bsuperficial (surgical site infections?|ssi)\b	
+superficial wound infection	SURGICAL SITE INFECTION	\bsuperficial wound infections?\b	
+postoperative wound infections	SURGICAL SITE INFECTION	\bpost[-\s]?operative wound infections?\b	
+surgical wound infection	SURGICAL SITE INFECTION	\bsurgical wound infections?\b	
+surgical site infection	SURGICAL SITE INFECTION	\bsurgical site infections?\b	
+infected wound	SURGICAL SITE INFECTION	\binfected wound\b	
+wound infected	SURGICAL SITE INFECTION	\bwound [a-z\w]?infected\b	
+wound infection	SURGICAL SITE INFECTION	\bwound infect(ion)?\b	
