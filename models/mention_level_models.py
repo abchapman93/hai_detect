@@ -7,9 +7,12 @@ import pyConTextNLP.itemData as itemData
 
 from nltk import word_tokenize
 
+from utils import helpers
+
 
 class MentionLevelModel(object):
     """
+    # TODO: Should we just use this as one model?
     This class will be used as an abstract model
     from which other models will inherit.
     """
@@ -37,88 +40,38 @@ class MentionLevelModel(object):
         Takes a report as a string and preprocesses it
         """
         #TODO: Decide how to represent text after preprocessing/classification
-
+        #text = helpers.preprocess(text)
         text = text.lower()
-        text = ' '.join(word_tokenize(text))
+        text = text.split() # Remove excess whitespaces
+        text = ' '.join(text)
 
         return text
 
 
-    def extract_markups(self, text):
+
+    def markup_sentence(self, sentence, prune_inactive=True):
         """
-        Extracts pyConText markups from a string.
-        First preprocesses the string.
-        Returns a list of markups
+        Identifies all markups in a sentence
         """
-        text = self.preprocess_text(text)
-        pass
-
-
-class SSIModel(MentionLevelModel):
-    """
-    This class that will be used to classify UTIs
-    """
-
-    # class attribute to define acceptable mention types
-    __mention_types = ['SUPERFICIAL SSI', 'DEEP INCISIONAL SSI', 'ORGAN/SPACE SSI']
-
-    def __init__(self, targets_file, modifiers_file):
-        super().__init__(targets_file, modifiers_file)
-
-
-    def preprocess_text(self, text):
-        """
-        Additional preprocessing sepcific to this class
-        after general preprocessing is completed by
-        `self._preprocess_string`
-        """
-        text = self._preprocess_text(text)
-        return text
-
-
-class UTIModel(MentionLevelModel):
-    """
-    This class that will be used to classify UTIs
-    """
-    # class attribute to define acceptable mention types
-    __mention_types = ['UTI']
-
-    def __init__(self, targets_file, modifiers_file):
-        super().__init__(targets_file, modifiers_file)
-
-
-    def preprocess_text(self, text):
-        """
-        Additional preprocessing sepcific to this class
-        after general preprocessing is completed by
-        `self._preprocess_string`
-        """
-        text = self._preprocess_text(text)
-        return text
-
-
-class PneumoniaModel(MentionLevelModel):
-    # class attribute to define acceptable mention types
-    __mention_types = ['PNEUMONIA']
-
-    def __init__(self, targets_file, modifiers_file):
-        super().__init__(targets_file, modifiers_file)
-
-
-    def preprocess_text(self, text):
-        """
-        Additional preprocessing sepcific to this class
-        after general preprocessing is completed by
-        `self._preprocess_string`
-        """
-        text = self._preprocess_text(text)
-        return text
+        markup = pyConText.ConTextMarkup()
+        markup.setRawText(sentence)
+        #markup.cleanText()
+        markup.markItems(self.modifiers, mode="modifier")
+        markup.markItems(self.targets, mode="target")
+        markup.pruneMarks()
+        markup.dropMarks('Exclusion')
+        # apply modifiers to any targets within the modifiers scope
+        markup.applyModifiers()
+        markup.pruneSelfModifyingRelationships()
+        if prune_inactive:
+            markup.dropInactiveModifiers()
+        return markup
 
 
 if __name__ == '__main__':
-    targets = os.path.abspath('../lexicon/pneumonia.tsv')
+    targets = os.path.abspath('../lexicon/targets.tsv')
     modifiers = os.path.abspath('../lexicon/modifiers.tsv')
-    model = PneumoniaModel(targets, modifiers)
+    model = MentionLevelModel(targets, modifiers)
     print(model.targets)
-    string = "The patient shows symptoms of pneumonia. Signed, Dr. Doctor, MD"
-    print(model.preprocess_text(string))
+    string = "The patient shows symptoms of pneumonia.".lower()
+    print(model.markup_sentence(string))

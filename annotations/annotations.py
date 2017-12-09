@@ -17,18 +17,20 @@ class ClinicalTextDocument(object):
     this is saved as an attribute `raw_text`.
     """
 
-    def __init__(self, text):
+    def __init__(self, text, rpt_id=''):
         self.raw_text = text
+        self.rpt_id = rpt_id
         self.original_spans = self.get_text_spans(text)
         self.preprocessed_text = self.preprocess(text)
         self.split_text_and_spans = None
+        self.sentences = [] # This will be a list of dictionairies
+                            # where each dict contains {
+                            # 'idx': int, 'text': sentence, 'word_spans': [(start, end), ...], 'span': (start, end)
+                            # }
 
         # Split into sentences
         # While maintaining the original text spans
-        sentences, word_spans, sentence_spans = self.split_sentences(self.preprocessed_text, self.original_spans)
-        self.sentences = sentences
-        self.word_spans = word_spans
-        self.sentence_spans = sentence_spans
+        self.sentences = self.split_sentences(self.preprocessed_text, self.original_spans)
 
 
     def get_text_spans(self, text):
@@ -83,13 +85,14 @@ class ClinicalTextDocument(object):
         words = text.split()
 
         sentences = [] # List of list of words
-        word_spans = [] # List of list of start, end points for words
-        sentence_spans = [] # List of start, end points for sentences
+        #word_spans = [] # List of list of start, end points for words
+        #sentence_spans = [] # List of start, end points for sentences
 
+        idx = 0
+        sentence_dict = {}
         current_sentence = []
         current_spans = []
         for word, span in zip(words, spans):
-            print(word, span)
             # Populate `current_sentence` with words
             # and `current_spans` with spans for each word
             current_sentence.append(word)
@@ -97,21 +100,46 @@ class ClinicalTextDocument(object):
 
             if word[-1] in termination_points and word not in exception_words:
                 # Add `current_sentence` and `current_spans` to larger lists
-                sentences.append(current_sentence)
-                word_spans.append(current_spans)
-                sentence_spans.append((current_spans[0][0], current_spans[-1][-1]))
+                sentence_dict['text'] = ' '.join(current_sentence)
+                sentence_dict['words'] = current_sentence
+                sentence_dict['idx'] = idx
+                sentence_dict['span'] = (current_spans[0][0], current_spans[-1][-1])
+                sentence_dict['word_spans'] = current_spans
+                sentence_dict['annotations'] = [] # Will later store annotations
+                sentences.append(sentence_dict)
 
                 # Start a new sentence
+                idx += 1
+                sentence_dict = {}
                 current_sentence = []
                 current_spans = []
 
         # Take care of any words remaining
         if len(current_sentence):
-            sentences.append(current_sentence)
-            word_spans.append(current_spans)
-            sentence_spans.append((current_spans[0][0], current_spans[-1][-1]))
+            sentence_dict['text'] = ' '.join(current_sentence)
+            sentence_dict['words'] = current_sentence
+            sentence_dict['idx'] = idx
+            sentence_dict['span'] = (current_spans[0][0], current_spans[-1][-1])
+            sentence_dict['word_spans'] = current_spans
+            sentence_dict['annotations'] = []
+            sentences.append(sentence_dict)
 
-        return sentences, word_spans, sentence_spans
+        return sentences
+
+    def annotate(self, model):
+        """
+        This methods takes a MentionLevelModel that identifies targets and modifiers.
+        For each sentence in self.sentences, the model identifies all findings using pyConText.
+        These markups are then used to create Annotations and are added to `sentence['annotations']`
+        """
+
+
+    def __str__(self):
+        string = ''
+        string += 'Report {0}\n'.format(self.rpt_id)
+        for sentence in self.sentences:
+            string += '{span}: {text}\n'.format(**sentence)
+        return string
 
 
 class AnnotationDocument(object):
@@ -227,27 +255,23 @@ class Annotation(object):
         return string
 
 
-def markup_sentence(s, modifiers, targets, prune_inactive=True):
+def main():
     """
+    An example of processing one text document.
     """
-    markup = pyConText.ConTextMarkup()
-    markup.setRawText(s)
-    #markup.cleanText()
-    markup.markItems(modifiers, mode="modifier")
-    markup.markItems(targets, mode="target")
-    markup.pruneMarks()
-    markup.dropMarks('Exclusion')
-    # apply modifiers to any targets within the modifiers scope
-    markup.applyModifiers()
-    markup.pruneSelfModifyingRelationships()
-    if prune_inactive:
-        markup.dropInactiveModifiers()
-    return markup
 
-
+    text = "We examined the patient yesterday. He shows signs of pneumonia.\
+    The wound is CDI. He has not developed a urinary tract infection\
+    However, there is a wound infection near the abdomen. Signed, Dr.Doctor MD."
+    rpt_id = 'example_report'
+    document = ClinicalTextDocument(text, rpt_id='example_report')
+    print(document)
+    document.annotate()
 
 
 if __name__ == '__main__':
+    main()
+    exit()
     string = "The patient shows symptoms of pneumonia. The wound is CDI. \
     He has not developed an urinary tract infection.\n Signed, Dr. Doctor, MD"
 
