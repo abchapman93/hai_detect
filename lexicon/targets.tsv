@@ -1,0 +1,15 @@
+Lex	Type	Regex	Direction
+abscess	ORGAN/SPACE SURGICAL SITE INFECTION	\babscess(es)*\b	
+infected fluid	ORGAN/SPACE SURGICAL SITE INFECTION	\binfected fluids?\b	
+superficial surgical site infection	SUPERFICIAL SURGICAL SITE INFECTION	\bsuperficial (surgical site infections?|ssi)\b	
+superficial wound infection	SUPERFICIAL SURGICAL SITE INFECTION	\bsuperficial wound infections?\b	
+postoperative wound infections	SUPERFICIAL SURGICAL SITE INFECTION	\bpost[-\s]?operative wound infections?\b	
+surgical wound infection	SUPERFICIAL SURGICAL SITE INFECTION	\bsurgical wound infections?\b	
+surgical site infection	SUPERFICIAL SURGICAL SITE INFECTION	\bsurgical site infections?\b	
+infected wound	SUPERFICIAL SURGICAL SITE INFECTION	\binfected wound\b	
+wound infected	SUPERFICIAL SURGICAL SITE INFECTION	\bwound [a-z\w]?infected\b	
+wound infection	SUPERFICIAL SURGICAL SITE INFECTION	\bwound infect(ion)?\b	
+urinary tract infection	URINARY TRACT INFECTION	\burinary( tract)? infect(ion)?s?\b	
+uti	URINARY TRACT INFECTION	\butis?\b	
+pneumonia	PNEUMONIA	\bpneumonia\b		    
+cdi	SUPERFICIAL SURGICAL SITE INFECTION	\b(cdi|clean,? dry,?(and)? intact)\b	

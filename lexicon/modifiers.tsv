@@ -1,5 +1,7 @@
 Lex	Type	Regex	Direction	Unnamed: 4	Unnamed: 5	Unnamed: 6	Codes
 abdomen	ANATOMY		bidirectional	
+wound	SURGICAL SITE		bidirectional	
+surgical site	SURGICAL SITE		bidirectional	
 are ruled out	DEFINITE_NEGATED_EXISTENCE		backward				
 be ruled out	INDICATION		backward				
 being ruled out	INDICATION		backward				

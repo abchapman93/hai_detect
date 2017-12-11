@@ -36,6 +36,8 @@ class ClinicalTextDocument(object):
                             # where each dict contains {
                             # 'idx': int, 'text': sentence, 'word_spans': [(start, end), ...], 'span': (start, end)
                             # }
+        self.annotations = []
+        self.sentences_with_annotations = []
 
         # Split into sentences
         # While maintaining the original text spans
@@ -120,7 +122,6 @@ class ClinicalTextDocument(object):
                 sentence_dict['idx'] = idx
                 sentence_dict['span'] = (current_spans[0][0], current_spans[-1][-1])
                 sentence_dict['word_spans'] = current_spans
-                sentence_dict['annotations'] = [] # Will later store annotations
                 sentences.append(sentence_dict)
 
                 # Start a new sentence
@@ -136,7 +137,6 @@ class ClinicalTextDocument(object):
             sentence_dict['idx'] = idx
             sentence_dict['span'] = (current_spans[0][0], current_spans[-1][-1])
             sentence_dict['word_spans'] = current_spans
-            sentence_dict['annotations'] = []
             sentences.append(sentence_dict)
 
         return sentences
@@ -147,7 +147,7 @@ class ClinicalTextDocument(object):
         For each sentence in self.sentences, the model identifies all findings using pyConText.
         These markups are then used to create Annotations and are added to `sentence['annotations']`
         """
-        for sentence in self.sentences:
+        for sentence_num, sentence in enumerate(self.sentences):
             markup = model.markup_sentence(sentence['text'])
             targets = markup.getMarkedTargets()
 
@@ -155,17 +155,27 @@ class ClinicalTextDocument(object):
             for target in targets:
                 annotation = Annotation()
                 annotation.from_markup(target, markup, sentence['text'], sentence['span'])
-                sentence['annotations'].append(annotation)
+                annotation.sentence_num = sentence_num
+                # TODO: decide whether to exclude annotations without anatomy
+                self.sentences_with_annotations.append(sentence_num)
+                self.annotations.append(annotation)
+
+
+    def get_annotations(self):
+        """
+        Returns a list of annotations.
+        """
+        return this.annotations
 
 
     def __str__(self):
         string = ''
         string += 'Report {0}\n'.format(self.rpt_id)
-        for sentence in self.sentences:
+        for sentence_num, sentence in enumerate(self.sentences):
             string += '{span}: {text}\n'.format(**sentence)
-            if len(sentence['annotations']):
+            if sentence_num in self.sentences_with_annotations:
                 string += 'Annotations:\n'
-                for annotation in sentence['annotations']:
+                for annotation in [a for a in self.annotations if a.sentence_num == sentence_num]:
                     string += '-- ' + annotation.get_short_string() + '\n'
         return string
 
@@ -188,7 +198,9 @@ class Annotation(object):
     """
 
     # Dictionary mapping pyConText target types to eHOST class names
-    _annotation_types = {'surgical site infection': 'Evidence of SSI',
+    _annotation_types = {'organ/space surgical site infection': 'Evidence of SSI',
+                         'deep surgical site infection': 'Evidence of SSI',
+                         'superficial surgical site infection': 'Evidence of SSI',
                            'urinary tract infection': 'Evidence of UTI',
                            'pneumonia': 'Evidence of Pneumonia'
     }
@@ -221,6 +233,7 @@ class Annotation(object):
         self.datetime = datetime.now().strftime('%m%d%Y %H:%M:%S')
         self.id = ''  # TODO: Change this
         self.text = None
+        self.sentence_num = None
         self.span_in_sentence = None
         self.span_in_document = None
         self.annotation_type = None # eHOST class names: 'Evidence of SSI', 'Evidence of Pneumonia', 'Evidence of UTI'
@@ -265,10 +278,11 @@ class Annotation(object):
                 self.markup_category, set(self._annotation_types.items())
             ))
 
-        # If the target is not of category `surgical site infection`,
-        # Drop all anatomical modifiers
-        if self.markup_category != 'surgical site infection':
-            markup.dropMarks('anatomy')
+        # If the target is a surgical site infection,
+        # classify the type
+        # ['organ/space', 'superficial', 'deep']
+        else:
+            self.attributes['infection_type'] = self.markup_category.strip(' surgical site infection')
 
 
         # Get the entire span in sentence.
@@ -294,7 +308,9 @@ class Annotation(object):
         # Update attributes
         # These will be used later to classify the annotation
         # This is the core logic for classifying markups
-        if 'definite_existence' in self.modifier_categories:
+        if 'cdi' in tag_object.getLiteral():
+            self.attributes['assertion'] = 'negated'
+        elif 'definite_existence' in self.modifier_categories:
             self.attributes['assertion'] = 'positive'
         elif 'definite_negated_existence' in self.modifier_categories:
             self.attributes['assertion'] = 'negated'
@@ -303,12 +319,14 @@ class Annotation(object):
         elif 'probable_existence' in self.modifier_categories:
             self.attributes['assertion'] = 'probable'
 
+
         # TODO: Update temporality
 
         # Add anatomical sites to instances of surgical site infections
-        if 'anatomy' in self.modifier_categories:
-            self.attributes['anatomy'] = [mod.getLiteral() for mod in markup.getModifiers(tag_object)
-                                          if 'anatomy' in mod.getCategory()]
+        if 'surgical site infection' in self.markup_category:
+                self.attributes['anatomy'] = [mod.getLiteral() for mod in markup.getModifiers(tag_object)
+                                          if 'anatomy' in mod.getCategory() or
+                                          'surgical site' in mod.getCategory()]
 
         self.classify()
 
@@ -327,6 +345,13 @@ class Annotation(object):
         classification = self._annotation_classifications[self.annotation_type][self.attributes['assertion']]
         if self.attributes['temporality'] != 'current':
             classification += ' - {}'.format(self.attributes['temporality'].title())
+
+        # Exclude any annotations of a surgical site infection that doesn't have anatomy
+        # TODO: Implement coreference resolution in `from_markup()`
+        # TODO: Test whether we actually want to do this
+        if classification == 'Positive Evidence of SSI' and self.attributes['anatomy'] == []:
+            classification += ' - No Anatomy'
+
         self.classification = classification
         return classification
 
@@ -371,11 +396,16 @@ def main():
 
     text = "We examined the patient yesterday. He shows signs of pneumonia.\
     The wound is CDI. He has not developed a urinary tract infection\
-    However, there is a wound infection near the abdomen. Signed, Dr.Doctor MD."
+    However, there is a wound infection near the abdomen. There is no surgical site infection.\
+    There is an abscess. Signed, Dr.Doctor MD."
     rpt_id = 'example_report'
     document = ClinicalTextDocument(text, rpt_id='example_report')
     document.annotate(model)
     print(document)
+
+    for annotation in document.annotations:
+        print(annotation)
+        print()
 
 
 if __name__ == '__main__':
