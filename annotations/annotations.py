@@ -2,22 +2,31 @@
 This module defines classes that are used to represent texts and annotations.
 """
 import os
+from datetime import datetime
 from nltk.tokenize.punkt import PunktSentenceTokenizer
 from nltk.tokenize import WhitespaceTokenizer
 
 from pyConTextNLP import pyConTextGraph as pyConText
 import pyConTextNLP.itemData as itemData
 
+from models.mention_level_models import MentionLevelModel
+
 
 class ClinicalTextDocument(object):
     """
     This class is a representation of a single clinical documents.
-    It is initialized with `text`, an unprocessed text document.
+    It is initialized either with `text`, an unprocessed text document
+    and `rpt_id`, a unique identifier for the file (most often the filename),
+    OR `filepath`, a filepath to a single report.
     In order to preserve the initial document spans,
     this is saved as an attribute `raw_text`.
     """
 
-    def __init__(self, text, rpt_id=''):
+    def __init__(self, text=None, rpt_id='', filepath=None):
+        if (not text) and filepath:
+            text = self.from_filepath(filepath)
+            rpt_id = os.path.splitext(os.path.basename(filepath))[0]
+
         self.raw_text = text
         self.rpt_id = rpt_id
         self.original_spans = self.get_text_spans(text)
@@ -31,6 +40,12 @@ class ClinicalTextDocument(object):
         # Split into sentences
         # While maintaining the original text spans
         self.sentences = self.split_sentences(self.preprocessed_text, self.original_spans)
+
+
+    def from_filepath(self, filepath):
+        with open(filepath) as f:
+            text = f.read()
+        return text
 
 
     def get_text_spans(self, text):
@@ -132,6 +147,15 @@ class ClinicalTextDocument(object):
         For each sentence in self.sentences, the model identifies all findings using pyConText.
         These markups are then used to create Annotations and are added to `sentence['annotations']`
         """
+        for sentence in self.sentences:
+            markup = model.markup_sentence(sentence['text'])
+            targets = markup.getMarkedTargets()
+
+            # Create annotations out of targets
+            for target in targets:
+                annotation = Annotation()
+                annotation.from_markup(target, markup, sentence['text'], sentence['span'])
+                sentence['annotations'].append(annotation)
 
 
     def __str__(self):
@@ -139,6 +163,10 @@ class ClinicalTextDocument(object):
         string += 'Report {0}\n'.format(self.rpt_id)
         for sentence in self.sentences:
             string += '{span}: {text}\n'.format(**sentence)
+            if len(sentence['annotations']):
+                string += 'Annotations:\n'
+                for annotation in sentence['annotations']:
+                    string += '-- ' + annotation.get_short_string() + '\n'
         return string
 
 
@@ -159,14 +187,46 @@ class Annotation(object):
     or from a pyConText markup.
     """
 
+    # Dictionary mapping pyConText target types to eHOST class names
+    _annotation_types = {'surgical site infection': 'Evidence of SSI',
+                           'urinary tract infection': 'Evidence of UTI',
+                           'pneumonia': 'Evidence of Pneumonia'
+    }
+
+    # Classifications based on assertion
+    # NOTE:
+    # May change the value of 'probable' to 'Positive Evidence'
+    _annotation_classifications = {'Evidence of SSI': {
+                                        'positive': 'Positive Evidence of SSI',
+                                        'negated': 'Negated Evidence of SSI',
+                                        'probable': 'Probable Evidence of SSI',
+                                        'indication': 'Indication of SSI'
+                                    },
+                                    'Evidence of UTI': {
+                                        'positive': 'Positive Evidence of UTI',
+                                        'negated': 'Negated Evidence of UTI',
+                                        'probable': 'Probable Evidence of UTI',
+                                        'indication': 'Indication of UTI',
+                                    },
+                                    'Evidence of Pneumonia': {
+                                        'positive': 'Positive Evidence of Pneumonia',
+                                        'negated': 'Negated Evidence of Pneumonia',
+                                        'probable': 'Probable Evidence of Pneumonia',
+                                        'indication': 'Indication of Pneumonia'
+                                    }
+    }
+
     def __init__(self):
         self.sentence = None
+        self.datetime = datetime.now().strftime('%m%d%Y %H:%M:%S')
+        self.id = ''  # TODO: Change this
         self.text = None
         self.span_in_sentence = None
         self.span_in_document = None
+        self.annotation_type = None # eHOST class names: 'Evidence of SSI', 'Evidence of Pneumonia', 'Evidence of UTI'
         self.attributes = {
             'assertion': 'positive', # positive, probable, negated, indication
-            'temporality': 'present', # current, historical, future/hypothetical
+            'temporality': 'current', # current, historical, future/hypothetical
             'anatomy': [],
         }
 
@@ -182,7 +242,7 @@ class Annotation(object):
     def from_ehost(self, xml_tag):
         pass
 
-    def from_markup(self, markup, tag_object, sentence, sentence_span):
+    def from_markup(self, tag_object, markup, sentence, sentence_span):
         """
         Takes a markup and a tag_object, a target node from that markup.
         Sentence is the raw text.
@@ -194,6 +254,21 @@ class Annotation(object):
         returned from`markup.getMarkedTargets()`
         """
         self.annotator = 'hai_detect'
+
+        # Get category of target
+        self.markup_category = tag_object.getCategory()[0]
+        self.annotation_type = self._annotation_types[self.markup_category]
+
+        # Make sure this is an annotation class that we recognize
+        if self.markup_category not in self._annotation_types:
+            raise NotImplementedError("{} is not a valid annotation type, must be one of: {}".format(
+                self.markup_category, set(self._annotation_types.items())
+            ))
+
+        # If the target is not of category `surgical site infection`,
+        # Drop all anatomical modifiers
+        if self.markup_category != 'surgical site infection':
+            markup.dropMarks('anatomy')
 
 
         # Get the entire span in sentence.
@@ -218,32 +293,61 @@ class Annotation(object):
 
         # Update attributes
         # These will be used later to classify the annotation
-        if 'definite existence' in self.modifier_categories:
+        # This is the core logic for classifying markups
+        if 'definite_existence' in self.modifier_categories:
             self.attributes['assertion'] = 'positive'
-        if 'definite_negated_existence' in self.modifier_categories:
+        elif 'definite_negated_existence' in self.modifier_categories:
             self.attributes['assertion'] = 'negated'
-        if 'indication' in self.modifier_categories:
+        elif 'indication' in self.modifier_categories:
             self.attributes['assertion'] = 'indication'
-        if 'probable_existence' in self.modifier_categories:
+        elif 'probable_existence' in self.modifier_categories:
             self.attributes['assertion'] = 'probable'
-        print(self.modifier_categories)
-        #for mod in markup.getModifiers():
-            #print(mod.getCategory())
 
+        # TODO: Update temporality
+
+        # Add anatomical sites to instances of surgical site infections
         if 'anatomy' in self.modifier_categories:
             self.attributes['anatomy'] = [mod.getLiteral() for mod in markup.getModifiers(tag_object)
                                           if 'anatomy' in mod.getCategory()]
 
+        self.classify()
 
 
+    def classify(self):
+        """
+        This method applies heuristics for classifying an annotation
+        For example, an annotation that has `category` = `surgical site infection`,
+        `assertion` = `negated` and `temporality` = `current` would be classified as
+        'Negative Evidence of Surgical Site Infection'.
 
-        pass
+        Sets object's attribute `classification`.
+        Returns classification.
+        """
 
-    def classify_annotation(self):
-        pass
+        classification = self._annotation_classifications[self.annotation_type][self.attributes['assertion']]
+        if self.attributes['temporality'] != 'current':
+            classification += ' - {}'.format(self.attributes['temporality'].title())
+        self.classification = classification
+        return classification
+
+
 
     def compare(self, second_annotation):
         pass
+
+    def get_short_string(self):
+        """
+        This returns a brief string representation of the annotation
+        That can be used for printing ClinicalTextDocuments after annotation
+        """
+        string = '<annotation '
+        string += 'time={} '.format(self.datetime)
+        string += 'id={} '.format(self.id)
+        string += 'annotator={} '.format(self.annotator)
+        string += 'text={} '.format(self.text)
+        string += 'classification={}'.format(self.classification)
+        string += '></annotation>'
+        return string
 
     def __str__(self):
         string =  'Annotation by: {a}\nSentence: {s}\nText: {t}\nSpan: {sp}\n'.format(
@@ -260,50 +364,22 @@ def main():
     An example of processing one text document.
     """
 
+    # Create a model with modifiers and targets
+    targets = os.path.abspath('../lexicon/targets.tsv')
+    modifiers = os.path.abspath('../lexicon/modifiers.tsv')
+    model = MentionLevelModel(targets, modifiers)
+
     text = "We examined the patient yesterday. He shows signs of pneumonia.\
     The wound is CDI. He has not developed a urinary tract infection\
     However, there is a wound infection near the abdomen. Signed, Dr.Doctor MD."
     rpt_id = 'example_report'
     document = ClinicalTextDocument(text, rpt_id='example_report')
+    document.annotate(model)
     print(document)
-    document.annotate()
 
 
 if __name__ == '__main__':
     main()
-    exit()
-    string = "The patient shows symptoms of pneumonia. The wound is CDI. \
-    He has not developed an urinary tract infection.\n Signed, Dr. Doctor, MD"
-
-    sentence = "There is no evidence of surgical site infection near the abdomen but there is a wound infection.".lower()
-    #TODO: sentence span should come from a clinical text document and should reflect the original, uncleaned text
-    sentence_span = (0, len(sentence))
-
-    targets = os.path.abspath('../lexicon/ssi.tsv')
-    modifiers = os.path.abspath('../lexicon/modifiers.tsv')
-
-    targets = itemData.instantiateFromCSVtoitemData(targets)
-    modifiers = itemData.instantiateFromCSVtoitemData(modifiers)
-
-    m = markup_sentence(sentence, modifiers=modifiers, targets=targets)
-    for target in m.getMarkedTargets():
-        annotation = Annotation()
-        annotation.from_markup(m, target, sentence, sentence_span)
-        print(annotation)
-    exit()
-    target = m.getMarkedTargets()[0]
-
-    print(annotation)
-    exit()
-
-    print(m.nodes(data=True));
-    print(m.getMarkedTargets()); exit()
-
-    document = ClinicalTextDocument(string)
-    print(document.raw_text_spans)
-    print(document.preprocessed_text)
-    print(document.split_sentences(document.preprocessed_text, document.raw_text_spans))
-
     exit()
 
 
