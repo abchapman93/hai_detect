@@ -19,8 +19,8 @@ class MentionLevelModel(object):
 
     def __init__(self, targets_file, modifiers_file):
         """Instantiate targets and modifiers"""
-        self.targets_file = 'file://'+targets_file
-        self.modifiers_file = 'file://'+modifiers_file
+        self.targets_file = targets_file
+        self.modifiers_file = modifiers_file
         self.targets = self.instantiate_targets()
         self.modifiers = self.instantiate_modifiers()
 
