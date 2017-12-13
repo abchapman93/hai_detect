@@ -2,9 +2,14 @@
 This module defines classes that are used to represent texts and annotations.
 """
 import os
+import re
 from datetime import datetime
 from nltk.tokenize.punkt import PunktSentenceTokenizer
 from nltk.tokenize import WhitespaceTokenizer
+
+import xml.etree.ElementTree as ElementTree
+from xml.etree.ElementTree import Element, SubElement
+from xml.dom import minidom
 
 from pyConTextNLP import pyConTextGraph as pyConText
 import pyConTextNLP.itemData as itemData
@@ -38,6 +43,7 @@ class ClinicalTextDocument(object):
                             # }
         self.annotations = []
         self.sentences_with_annotations = []
+        self.element_tree = None
 
         # Split into sentences
         # While maintaining the original text spans
@@ -168,15 +174,72 @@ class ClinicalTextDocument(object):
         return this.annotations
 
 
+    def to_etree(self):
+        """
+        Creates an eTree XML element
+        """
+        root = Element('annotations')
+        root.set('textSource', self.rpt_id + '.txt')
+        # TODO:
+        for annotation in self.annotations:
+            root.append(annotation.to_etree())
+            #root.append(annotation.get_xml())
+            #root.append(annotation.get_mention_xml())
+
+        # xml for adjudication status
+        adjudication_status = SubElement(root, 'eHOST_Adjudication_status')
+        adjudication_status.set('version','1.0')
+        selected_annotators = SubElement(adjudication_status,'Adjudication_Selected_Annotators')
+        selected_annotators.set('version','1.0')
+        selected_classes = SubElement(adjudication_status,'Adjudication_Selected_Classes')
+        selected_classes.set('version','1.0')
+        adjudication_others = SubElement(adjudication_status,'Adjudication_Others')
+
+        check_spans = SubElement(adjudication_others,'CHECK_OVERLAPPED_SPANS')
+        check_spans.text = 'false'
+        check_attributes = SubElement(adjudication_others,'CHECK_ATTRIBUTES')
+        check_attributes.text = 'false'
+        check_relationship = SubElement(adjudication_others,'CHECK_RELATIONSHIP')
+        check_relationship.text = 'false'
+        check_class = SubElement(adjudication_others,'CHECK_CLASS')
+        check_class.text = 'false'
+        check_comment = SubElement(adjudication_others,'CHECK_COMMENT')
+        check_comment.text = 'false'
+
+        return ElementTree.ElementTree(root)
+
+
+        #self.element_tree = ElementTree.ElementTree(root)
+
+
+
+    def to_knowtator(self, outdir):
+        """
+        This method saves all annotations in an instance of ClinicalTextDocument to a .knowtator.xml file
+        to be imported into eHOST.
+        outdir is the directory to which the document will be saved.
+        The outpath will be '/path/to/outdir/rpt_id.knowtator.xml'
+        """
+        if not os.path.isdir(outdir):
+            raise FileNotFoundError("{} is not a directory".format(outdir))
+        outpath = os.path.join(outdir, self.rpt_id + '.txt.knowtator.xml')
+        element_tree = self.to_etree()
+        f_out = open(outpath, 'w')
+        element_tree.write(f_out, encoding='unicode')
+        print("Saved at {}".format(outpath))
+        f_out.close()
+
+
+
+
     def __str__(self):
         string = ''
         string += 'Report {0}\n'.format(self.rpt_id)
         for sentence_num, sentence in enumerate(self.sentences):
-            string += '{span}: {text}\n'.format(**sentence)
+            string += '{text} '.format(**sentence)
             if sentence_num in self.sentences_with_annotations:
-                string += 'Annotations:\n'
                 for annotation in [a for a in self.annotations if a.sentence_num == sentence_num]:
-                    string += '-- ' + annotation.get_short_string() + '\n'
+                    string +=  annotation.get_short_string() + '\n'
         return string
 
 
@@ -201,6 +264,7 @@ class Annotation(object):
     _annotation_types = {'organ/space surgical site infection': 'Evidence of SSI',
                          'deep surgical site infection': 'Evidence of SSI',
                          'superficial surgical site infection': 'Evidence of SSI',
+                         'negated superficial surgical site infection': 'Evidence of SSI',
                            'urinary tract infection': 'Evidence of UTI',
                            'pneumonia': 'Evidence of Pneumonia'
     }
@@ -255,6 +319,7 @@ class Annotation(object):
     def from_ehost(self, xml_tag):
         pass
 
+
     def from_markup(self, tag_object, markup, sentence, sentence_span):
         """
         Takes a markup and a tag_object, a target node from that markup.
@@ -267,22 +332,23 @@ class Annotation(object):
         returned from`markup.getMarkedTargets()`
         """
         self.annotator = 'hai_detect'
+        self.id = tag_object.getTagID()
 
         # Get category of target
         self.markup_category = tag_object.getCategory()[0]
-        self.annotation_type = self._annotation_types[self.markup_category]
-
         # Make sure this is an annotation class that we recognize
         if self.markup_category not in self._annotation_types:
             raise NotImplementedError("{} is not a valid annotation type, must be one of: {}".format(
-                self.markup_category, set(self._annotation_types.items())
+                self.markup_category, set(self._annotation_types.values())
             ))
+
+        self.annotation_type = self._annotation_types[self.markup_category]
 
         # If the target is a surgical site infection,
         # classify the type
         # ['organ/space', 'superficial', 'deep']
-        else:
-            self.attributes['infection_type'] = self.markup_category.strip(' surgical site infection')
+        if 'surgical site infection' in self.markup_category:
+            self.attributes['infection_type'] = re.search('([a-z/]*) surgical site infection', self.markup_category).group(1)
 
 
         # Get the entire span in sentence.
@@ -308,7 +374,8 @@ class Annotation(object):
         # Update attributes
         # These will be used later to classify the annotation
         # This is the core logic for classifying markups
-        if 'cdi' in tag_object.getLiteral():
+        # `assertion` default value is 'positive'
+        if self.markup_category == 'negated superficial surgical site infection':
             self.attributes['assertion'] = 'negated'
         elif 'definite_existence' in self.modifier_categories:
             self.attributes['assertion'] = 'positive'
@@ -360,16 +427,40 @@ class Annotation(object):
     def compare(self, second_annotation):
         pass
 
+
+    def to_etree(self):
+        """
+        This method returns an eTree element that represents the annotation
+        and can be appended to the rest of the document and saved as a knowtator xml file.
+        """
+        annotation_body = Element('annotation')
+
+        mention_id = SubElement(annotation_body, 'mention')
+        mention_id.set('id', str(self.id))
+
+        annotator_id = SubElement(annotation_body, 'annotator')
+        annotator_id.set('id', 'eHOST_2010')
+        annotator_id.text = self.annotator
+
+        span = SubElement(annotation_body, 'span', {'start': str(self.span_in_document[0]),
+                                                    'end': str(self.span_in_document[1])})
+        spanned_text = SubElement(annotation_body, 'spannedText')
+        spanned_text.text = self.text
+        creation_date = SubElement(annotation_body, 'creationDate')
+        creation_date.text = self.datetime
+
+        return annotation_body
+
+
+
     def get_short_string(self):
         """
         This returns a brief string representation of the annotation
         That can be used for printing ClinicalTextDocuments after annotation
         """
         string = '<annotation '
-        string += 'time={} '.format(self.datetime)
-        string += 'id={} '.format(self.id)
         string += 'annotator={} '.format(self.annotator)
-        string += 'text={} '.format(self.text)
+        string += 'text="{}" '.format(self.text.upper())
         string += 'classification={}'.format(self.classification)
         string += '></annotation>'
         return string
@@ -377,8 +468,10 @@ class Annotation(object):
     def __str__(self):
         string =  'Annotation by: {a}\nSentence: {s}\nText: {t}\nSpan: {sp}\n'.format(
              a=self.annotator, s=self.sentence, sp=self.span_in_document, t=self.text)
-        string += 'Attributes:\n    Assertion: {assertion}\n    Temporality: {temporality}\n    Anatomical Sites: {anatomy}\n'.format(
-            **self.attributes)
+        string += 'Attributes:\n    Assertion: {assertion}\n    Temporality: {temporality}\n'.format(**self.attributes)
+        if self.annotation_type == 'Evidence of SSI':
+            string += '    Anatomical Sites: {anatomy}\n'.format(**self.attributes)
+            string += '    Infection type: {i}\n'.format(i=self.attributes['infection_type'])
         string += 'Classification: {c}'.format(c=self.classification)
 
         return string
@@ -403,8 +496,13 @@ def main():
     document.annotate(model)
     print(document)
 
+    outdir = 'tmp'
+    document.to_knowtator(outdir)
+    exit()
+
     for annotation in document.annotations:
         print(annotation)
+        print(annotation.to_etree())
         print()
 
 
