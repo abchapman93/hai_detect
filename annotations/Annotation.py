@@ -43,7 +43,7 @@ class Annotation(object):
 
     def __init__(self):
         self.sentence = None
-        self.datetime = datetime.now().strftime('%m%d%Y %H:%M:%S')
+        self.datetime = datetime.now().strftime('%m%d%Y %H:%M:%S') # TODO: Change this to match eHOST
         self.id = ''  # TODO: Change this
         self.text = None
         self.sentence_num = None
@@ -81,7 +81,7 @@ class Annotation(object):
         returned from`markup.getMarkedTargets()`
         """
         self.annotator = 'hai_detect'
-        self.id = tag_object.getTagID()
+        self.id = str(tag_object.getTagID())
 
         # Get category of target
         self.markup_category = tag_object.getCategory()[0]
@@ -181,11 +181,13 @@ class Annotation(object):
         """
         This method returns an eTree element that represents the annotation
         and can be appended to the rest of the document and saved as a knowtator xml file.
+        It returns two etree elements, annotation_body and class_mention.
+        eHOST uses both of these to display an annotation.
         """
         annotation_body = Element('annotation')
 
         mention_id = SubElement(annotation_body, 'mention')
-        mention_id.set('id', str(self.id))
+        mention_id.set('id', self.id)
 
         annotator_id = SubElement(annotation_body, 'annotator')
         annotator_id.set('id', 'eHOST_2010')
@@ -198,7 +200,17 @@ class Annotation(object):
         creation_date = SubElement(annotation_body, 'creationDate')
         creation_date.text = self.datetime
 
-        return annotation_body
+        # Now create class_mention
+        class_mention = Element("classMention")
+        class_mention.set("id", self.id)
+        mention_class = SubElement(class_mention, 'mentionClass')
+        mention_class.set('id', self.annotation_type)
+        mention_class.text = self.text
+
+        # TODO: Add attributes here
+
+
+        return annotation_body, class_mention
 
 
 

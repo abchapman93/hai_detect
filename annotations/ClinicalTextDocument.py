@@ -177,7 +177,10 @@ class ClinicalTextDocument(object):
         root.set('textSource', self.rpt_id + '.txt')
         # TODO:
         for annotation in self.annotations:
-            root.append(annotation.to_etree())
+            annotation_body, mention_class = annotation.to_etree()
+            root.append(annotation_body)
+            root.append(mention_class)
+            #root.append(annotation.to_etree())
             #root.append(annotation.get_xml())
             #root.append(annotation.get_mention_xml())
 
@@ -229,7 +232,7 @@ class ClinicalTextDocument(object):
 
     def __str__(self):
         string = ''
-        string += 'Report {0}\n'.format(self.rpt_id)
+        string += 'Report: {0}\n'.format(self.rpt_id)
         for sentence_num, sentence in enumerate(self.sentences):
             string += '{text} '.format(**sentence)
             if sentence_num in self.sentences_with_annotations:
