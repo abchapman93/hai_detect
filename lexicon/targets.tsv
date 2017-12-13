@@ -12,4 +12,4 @@ wound infection	SUPERFICIAL SURGICAL SITE INFECTION	\bwound infect(ion)?\b
 urinary tract infection	URINARY TRACT INFECTION	\burinary( tract)? infect(ion)?s?\b	
 uti	URINARY TRACT INFECTION	\butis?\b	
 pneumonia	PNEUMONIA	\bpneumonia\b		    
-cdi	SUPERFICIAL SURGICAL SITE INFECTION	\b(cdi|clean,? dry,?(and)? intact)\b	
+cdi	NEGATED SUPERFICIAL SURGICAL SITE INFECTION	\b(cdi|clean,? dry,?(and)? intact)\b	
