@@ -58,7 +58,12 @@ class MentionLevelModel(object):
         #markup.cleanText()
         markup.markItems(self.modifiers, mode="modifier")
         markup.markItems(self.targets, mode="target")
-        markup.pruneMarks()
+        try:
+            markup.pruneMarks()
+        except TypeError as e:
+            print("Error in pruneMarks")
+            print(markup)
+            print(e)
         markup.dropMarks('Exclusion')
         # apply modifiers to any targets within the modifiers scope
         markup.applyModifiers()
