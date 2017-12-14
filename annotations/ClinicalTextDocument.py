@@ -5,8 +5,11 @@ import os
 
 from nltk.tokenize import WhitespaceTokenizer
 
-import xml.etree.ElementTree as ElementTree
-from xml.etree.ElementTree import Element, SubElement
+#import xml.etree.ElementTree as ElementTree
+#from xml.etree.ElementTree import Element, SubElement
+
+from lxml import etree
+from lxml.etree import Element, SubElement
 
 from annotations.Annotation import Annotation
 from models.mention_level_models import MentionLevelModel
@@ -203,8 +206,8 @@ class ClinicalTextDocument(object):
         check_class.text = 'false'
         check_comment = SubElement(adjudication_others,'CHECK_COMMENT')
         check_comment.text = 'false'
-
-        return ElementTree.ElementTree(root)
+        return root
+        #return ElementTree.ElementTree(root)
 
 
         #self.element_tree = ElementTree.ElementTree(root)
@@ -223,7 +226,8 @@ class ClinicalTextDocument(object):
         outpath = os.path.join(outdir, self.rpt_id + '.txt.knowtator.xml')
         element_tree = self.to_etree()
         f_out = open(outpath, 'w')
-        element_tree.write(f_out, encoding='unicode')
+        f_out.write(etree.tostring(element_tree, pretty_print=True, encoding='unicode'))
+        #element_tree.write(f_out, pretty_print=True, encoding='unicode')
         print("Saved at {}".format(outpath))
         f_out.close()
 

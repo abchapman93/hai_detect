@@ -1,1 +1,73 @@
-<annotations textSource="example.txt"><annotation><mention id="157822119502630545392580546464928281064" /><annotator id="eHOST_2010">hai_detect</annotator><span end="62" start="44" /><spannedText>signs of pneumonia</spannedText><creationDate>12132017 12:26:05</creationDate></annotation><classMention id="157822119502630545392580546464928281064"><mentionClass id="Evidence of Pneumonia">signs of pneumonia</mentionClass></classMention><annotation><mention id="157823390322357274194822264897342583272" /><annotator id="eHOST_2010">hai_detect</annotator><span end="80" start="68" /><spannedText>wound is cdi</spannedText><creationDate>12132017 12:26:05</creationDate></annotation><classMention id="157823390322357274194822264897342583272"><mentionClass id="Evidence of SSI">wound is cdi</mentionClass></classMention><annotation><mention id="157825372610983381087533293651007943144" /><annotator id="eHOST_2010">hai_detect</annotator><span end="181" start="89" /><spannedText>not developed a urinary tract infection however, there is a wound infection near the abdomen</spannedText><creationDate>12132017 12:26:05</creationDate></annotation><classMention id="157825372610983381087533293651007943144"><mentionClass id="Evidence of UTI">not developed a urinary tract infection however, there is a wound infection near the abdomen</mentionClass></classMention><annotation><mention id="157825345673408126239769855646371459560" /><annotator id="eHOST_2010">hai_detect</annotator><span end="181" start="149" /><spannedText>wound infection near the abdomen</spannedText><creationDate>12132017 12:26:05</creationDate></annotation><classMention id="157825345673408126239769855646371459560"><mentionClass id="Evidence of SSI">wound infection near the abdomen</mentionClass></classMention><annotation><mention id="157826718697464498437939394269783044584" /><annotator id="eHOST_2010">hai_detect</annotator><span end="218" start="192" /><spannedText>no surgical site infection</spannedText><creationDate>12132017 12:26:05</creationDate></annotation><classMention id="157826718697464498437939394269783044584"><mentionClass id="Evidence of SSI">no surgical site infection</mentionClass></classMention><annotation><mention id="157827655174345417041689736968850158056" /><annotator id="eHOST_2010">hai_detect</annotator><span end="239" start="232" /><spannedText>abscess</spannedText><creationDate>12132017 12:26:05</creationDate></annotation><classMention id="157827655174345417041689736968850158056"><mentionClass id="Evidence of SSI">abscess</mentionClass></classMention><eHOST_Adjudication_status version="1.0"><Adjudication_Selected_Annotators version="1.0" /><Adjudication_Selected_Classes version="1.0" /><Adjudication_Others><CHECK_OVERLAPPED_SPANS>false</CHECK_OVERLAPPED_SPANS><CHECK_ATTRIBUTES>false</CHECK_ATTRIBUTES><CHECK_RELATIONSHIP>false</CHECK_RELATIONSHIP><CHECK_CLASS>false</CHECK_CLASS><CHECK_COMMENT>false</CHECK_COMMENT></Adjudication_Others></eHOST_Adjudication_status></annotations>
+<annotations textSource="example.txt">
+  <annotation>
+    <mention id="190521129973872758537639801854177620456"/>
+    <annotator id="eHOST_2010">hai_detect</annotator>
+    <span end="62" start="44"/>
+    <spannedText>signs of pneumonia</spannedText>
+    <creationDate>12142017 10:23:54</creationDate>
+  </annotation>
+  <classMention id="190521129973872758537639801854177620456">
+    <mentionClass id="Evidence of Pneumonia">signs of pneumonia</mentionClass>
+  </classMention>
+  <annotation>
+    <mention id="190522535323019436557439407871215841768"/>
+    <annotator id="eHOST_2010">hai_detect</annotator>
+    <span end="80" start="68"/>
+    <spannedText>wound is cdi</spannedText>
+    <creationDate>12142017 10:23:54</creationDate>
+  </annotation>
+  <classMention id="190522535323019436557439407871215841768">
+    <mentionClass id="Evidence of SSI">wound is cdi</mentionClass>
+  </classMention>
+  <annotation>
+    <mention id="190524868750861806672273243473315410408"/>
+    <annotator id="eHOST_2010">hai_detect</annotator>
+    <span end="181" start="89"/>
+    <spannedText>not developed a urinary tract infection however, there is a wound infection near the abdomen</spannedText>
+    <creationDate>12142017 10:23:54</creationDate>
+  </annotation>
+  <classMention id="190524868750861806672273243473315410408">
+    <mentionClass id="Evidence of UTI">not developed a urinary tract infection however, there is a wound infection near the abdomen</mentionClass>
+  </classMention>
+  <annotation>
+    <mention id="190524789522699292406539534044880220648"/>
+    <annotator id="eHOST_2010">hai_detect</annotator>
+    <span end="181" start="149"/>
+    <spannedText>wound infection near the abdomen</spannedText>
+    <creationDate>12142017 10:23:54</creationDate>
+  </annotation>
+  <classMention id="190524789522699292406539534044880220648">
+    <mentionClass id="Evidence of SSI">wound infection near the abdomen</mentionClass>
+  </classMention>
+  <annotation>
+    <mention id="190527062578681826652093645929449042408"/>
+    <annotator id="eHOST_2010">hai_detect</annotator>
+    <span end="218" start="192"/>
+    <spannedText>no surgical site infection</spannedText>
+    <creationDate>12142017 10:23:54</creationDate>
+  </annotation>
+  <classMention id="190527062578681826652093645929449042408">
+    <mentionClass id="Evidence of SSI">no surgical site infection</mentionClass>
+  </classMention>
+  <annotation>
+    <mention id="190528542560757593108997499831760499176"/>
+    <annotator id="eHOST_2010">hai_detect</annotator>
+    <span end="239" start="232"/>
+    <spannedText>abscess</spannedText>
+    <creationDate>12142017 10:23:54</creationDate>
+  </annotation>
+  <classMention id="190528542560757593108997499831760499176">
+    <mentionClass id="Evidence of SSI">abscess</mentionClass>
+  </classMention>
+  <eHOST_Adjudication_status version="1.0">
+    <Adjudication_Selected_Annotators version="1.0"/>
+    <Adjudication_Selected_Classes version="1.0"/>
+    <Adjudication_Others>
+      <CHECK_OVERLAPPED_SPANS>false</CHECK_OVERLAPPED_SPANS>
+      <CHECK_ATTRIBUTES>false</CHECK_ATTRIBUTES>
+      <CHECK_RELATIONSHIP>false</CHECK_RELATIONSHIP>
+      <CHECK_CLASS>false</CHECK_CLASS>
+      <CHECK_COMMENT>false</CHECK_COMMENT>
+    </Adjudication_Others>
+  </eHOST_Adjudication_status>
+</annotations>

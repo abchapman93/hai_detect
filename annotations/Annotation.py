@@ -1,6 +1,8 @@
 import re
 from datetime import datetime
-from xml.etree.ElementTree import Element, SubElement
+#from xml.etree.ElementTree import Element, SubElement
+from lxml.etree import Element, SubElement
+
 
 class Annotation(object):
     """
