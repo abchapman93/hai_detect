@@ -104,8 +104,9 @@ class ClinicalTextDocument(object):
         termination_points = '.!?'
         exception_words = ['dr.', 'm.d', 'mr.', 'ms.', 'mrs.', ]
         print(text)
-        header_points = helpers.find_header_points(text)
-        print(header_points)
+        headers = helpers.find_headers(text)
+        header_points = [m.span()[0] for m in headers]
+        print(headers)
 
         words = text.split()
 
@@ -128,7 +129,7 @@ class ClinicalTextDocument(object):
             # or if we've reacched a header,
             # append this sentence and start a new one
             if (word[-1] in termination_points and word not in exception_words) or\
-                    span[0] in header_points:
+                    span[1] in header_points:
                 # Add `current_sentence` and `current_spans` to larger lists
                 sentence_dict['text'] = ' '.join(current_sentence)
                 sentence_dict['words'] = current_sentence
@@ -269,8 +270,7 @@ def main():
 
     text = "  Impression: We examined the patient yesterday. He shows signs of pneumonia.\
     The wound is CDI. He has not developed a urinary tract infection\
-    However, there is a wound infection near the abdomen. There is no surgical site infection.\
-    There is an abscess  Surgical Sites: There is a surgical site infection. Signed, Dr.Doctor MD."
+    However, there is a wound infection near the abdomen. There is no surgical site infection. There is an abscess  Surgical Sites: There is a surgical site infection. Signed, Dr.Doctor MD."
     rpt_id = 'example_report'
     document = ClinicalTextDocument(text, rpt_id='example_report')
     document.annotate(model)
