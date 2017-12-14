@@ -1,0 +1,72 @@
+# This file should serve as a reference point for copying over to targets.tsv and modifiers.tsv
+# Delete any lines that you’ve already added
+erythemas	ERYTHEMA	
+erythematous	ERYTHEMA	
+erythema	ERYTHEMA	
+red	ERYTHEMA	
+redness	ERYTHEMA	
+dehicence	DEHISCENCE	
+dehiscence	DEHISCENCE	
+dehiscence of wound	DEHISCENCE	
+incision opened	DEHISCENCE	
+opened	DEHISCENCE	
+reopened	DEHISCENCE	
+wound dehiscence	DEHISCENCE	
+abd	ABDOMEN	
+abdomen	ABDOMEN	
+abdominal	ABDOMEN	
+midline	ABDOMEN	
+port	ABDOMEN	
+umbilical	ABDOMEN	
+purulence	PURULENCE	
+purulent	PURULENCE	
+pus	PURULENCE	
+soupy	PURULENCE	
+warmth	WARMTH	
+facial dehicence	FASCIAL DEHISCENCE	
+fascial dehiscence	FASCIAL DEHISCENCE	
+pneumonia	PNEUMONIA	
+pneumonia	PNEUMONIA	
+pneumoniae	PNEUMONIA	
+pneumonias	PNEUMONIA	
+pneumonitis	PNEUMONIA	
+pulmonary inflammation	PNEUMONIA	
+lung inflammation	PNEUMONIA	
+pneumonia	PNEUMONIA	
+pneumonias	PNEUMONIA	
+pneumonitis	PNEUMONIA	
+pulmonary inflammation	PNEUMONIA	
+unspecified pneumonia	PNEUMONIA	
+incisional	INCISION	
+incisions	INCISION	
+surgical incision	INCISION	
+surgical incisions	INCISION	
+wound	INCISION	
+incision	INCISION	
+post surgical scar	INCISION	
+surgical incision	INCISION	
+surgical incisions	INCISION	
+surgical site	INCISION	
+surgical sites	INCISION	
+surgical wound	INCISION	
+wound	INCISION	
+wounds	INCISION	
+cellulitis	CELLULITIS	
+infection	INFECTION	
+induration	INDURATION	
+indurations	INDURATION	
+swelled	INDURATION	
+swelling	INDURATION	
+swollen	INDURATION	
+discharge	DRAINAGE	
+drain	DRAINAGE	
+drainage	DRAINAGE	
+draining	DRAINAGE	
+drains	DRAINAGE	
+ooze	DRAINAGE	
+fascial	FASCIA	
+deep incision	FASCIA	
+fascia	FASCIA	
+stitch abscess	STITCH ABSCESS	
+postoperative stitch abscess	STITCH ABSCESS	
+stitch abscess	STITCH ABSCESS	

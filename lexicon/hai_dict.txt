@@ -1,0 +1,99 @@
+abscesses	<--->	ABSCESS
+abscess	<--->	ABSCESS
+abscesses	<--->	ABSCESS
+infected fluid	<--->	ABSCESS
+superficial surgical site infection	<--->	SUPERFICIAL SURGICAL SITE INFECTION
+superficial wound infection	<--->	SUPERFICIAL SURGICAL SITE INFECTION
+urinary tract infect	<--->	URINARY TRACT INFECTION
+urinary tract infection	<--->	URINARY TRACT INFECTION
+uti	<--->	URINARY TRACT INFECTION
+urinary tract infection	<--->	URINARY TRACT INFECTION
+urinary tract infections	<--->	URINARY TRACT INFECTION
+urinary infection	<--->	URINARY TRACT INFECTION
+urinary tract infection	<--->	URINARY TRACT INFECTION
+urinary tract infections	<--->	URINARY TRACT INFECTION
+urinary tract infection	<--->	URINARY TRACT INFECTION
+urinary tract infections	<--->	URINARY TRACT INFECTION
+utis	<--->	URINARY TRACT INFECTION
+postoperative wound infections	<--->	SURGICAL SITE INFECTION
+surgical wound infection	<--->	SURGICAL SITE INFECTION
+surgical site infection	<--->	SURGICAL SITE INFECTION
+infected wound	<--->	SURGICAL SITE INFECTION
+postoperative wound infection	<--->	SURGICAL SITE INFECTION
+surgical wound infection	<--->	SURGICAL SITE INFECTION
+wound infected	<--->	SURGICAL SITE INFECTION
+wound infection	<--->	SURGICAL SITE INFECTION
+cdi	<--->	HEALED
+healed	<--->	HEALED
+healing	<--->	HEALED
+clean, dry, and intact	<--->	HEALED
+erythemas	<--->	ERYTHEMA
+erythematous	<--->	ERYTHEMA
+erythema	<--->	ERYTHEMA
+red	<--->	ERYTHEMA
+redness	<--->	ERYTHEMA
+dehicence	<--->	DEHISCENCE
+dehiscence	<--->	DEHISCENCE
+dehiscence of wound	<--->	DEHISCENCE
+incision opened	<--->	DEHISCENCE
+opened	<--->	DEHISCENCE
+reopened	<--->	DEHISCENCE
+wound dehiscence	<--->	DEHISCENCE
+abd	<--->	ABDOMEN
+abdomen	<--->	ABDOMEN
+abdominal	<--->	ABDOMEN
+midline	<--->	ABDOMEN
+port	<--->	ABDOMEN
+umbilical	<--->	ABDOMEN
+purulence	<--->	PURULENCE
+purulent	<--->	PURULENCE
+pus	<--->	PURULENCE
+soupy	<--->	PURULENCE
+warmth	<--->	WARMTH
+facial dehicence	<--->	FASCIAL DEHISCENCE
+fascial dehiscence	<--->	FASCIAL DEHISCENCE
+pneumonia	<--->	PNEUMONIA
+pneumonia	<--->	PNEUMONIA
+pneumoniae	<--->	PNEUMONIA
+pneumonias	<--->	PNEUMONIA
+pneumonitis	<--->	PNEUMONIA
+pulmonary inflammation	<--->	PNEUMONIA
+lung inflammation	<--->	PNEUMONIA
+pneumonia	<--->	PNEUMONIA
+pneumonias	<--->	PNEUMONIA
+pneumonitis	<--->	PNEUMONIA
+pulmonary inflammation	<--->	PNEUMONIA
+unspecified pneumonia	<--->	PNEUMONIA
+incisional	<--->	INCISION
+incisions	<--->	INCISION
+surgical incision	<--->	INCISION
+surgical incisions	<--->	INCISION
+wound	<--->	INCISION
+incision	<--->	INCISION
+post surgical scar	<--->	INCISION
+surgical incision	<--->	INCISION
+surgical incisions	<--->	INCISION
+surgical site	<--->	INCISION
+surgical sites	<--->	INCISION
+surgical wound	<--->	INCISION
+wound	<--->	INCISION
+wounds	<--->	INCISION
+cellulitis	<--->	CELLULITIS
+infection	<--->	INFECTION
+induration	<--->	INDURATION
+indurations	<--->	INDURATION
+swelled	<--->	INDURATION
+swelling	<--->	INDURATION
+swollen	<--->	INDURATION
+discharge	<--->	DRAINAGE
+drain	<--->	DRAINAGE
+drainage	<--->	DRAINAGE
+draining	<--->	DRAINAGE
+drains	<--->	DRAINAGE
+ooze	<--->	DRAINAGE
+fascial	<--->	FASCIA
+deep incision	<--->	FASCIA
+fascia	<--->	FASCIA
+stitch abscess	<--->	STITCH ABSCESS
+postoperative stitch abscess	<--->	STITCH ABSCESS
+stitch abscess	<--->	STITCH ABSCESS
