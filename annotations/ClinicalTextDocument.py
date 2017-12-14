@@ -11,6 +11,7 @@ from nltk.tokenize import WhitespaceTokenizer
 from lxml import etree
 from lxml.etree import Element, SubElement
 
+from utils import helpers
 from annotations.Annotation import Annotation
 from models.mention_level_models import MentionLevelModel
 
@@ -73,13 +74,13 @@ class ClinicalTextDocument(object):
         """
         # Split by white space
         text = text.lower()
-        words = text.split()
+        #words = text.split()
 
         # Do preprocessing by removing replacing tokens with empty strings
         # or changing tokens.
         # The original spans will be maintained
 
-        text = ' '.join(words)
+        #text = ' '.join(words)
         return text
 
 
@@ -102,6 +103,9 @@ class ClinicalTextDocument(object):
 
         termination_points = '.!?'
         exception_words = ['dr.', 'm.d', 'mr.', 'ms.', 'mrs.', ]
+        print(text)
+        header_points = helpers.find_header_points(text)
+        print(header_points)
 
         words = text.split()
 
@@ -114,12 +118,17 @@ class ClinicalTextDocument(object):
         current_sentence = []
         current_spans = []
         for word, span in zip(words, spans):
+            print(word, span)
             # Populate `current_sentence` with words
             # and `current_spans` with spans for each word
             current_sentence.append(word)
             current_spans.append(span)
 
-            if word[-1] in termination_points and word not in exception_words:
+            # If you reach a termination point and it's not one of the above exception words,
+            # or if we've reacched a header,
+            # append this sentence and start a new one
+            if (word[-1] in termination_points and word not in exception_words) or\
+                    span[0] in header_points:
                 # Add `current_sentence` and `current_spans` to larger lists
                 sentence_dict['text'] = ' '.join(current_sentence)
                 sentence_dict['words'] = current_sentence
@@ -152,6 +161,9 @@ class ClinicalTextDocument(object):
         These markups are then used to create Annotations and are added to `sentence['annotations']`
         """
         for sentence_num, sentence in enumerate(self.sentences):
+            #print(sentence)
+            #print(sentence['text'])
+            #print(type(sentence['text']))
             markup = model.markup_sentence(sentence['text'])
             targets = markup.getMarkedTargets()
 
@@ -255,10 +267,10 @@ def main():
     modifiers = os.path.abspath('../lexicon/modifiers.tsv')
     model = MentionLevelModel(targets, modifiers)
 
-    text = "We examined the patient yesterday. He shows signs of pneumonia.\
+    text = "  Impression: We examined the patient yesterday. He shows signs of pneumonia.\
     The wound is CDI. He has not developed a urinary tract infection\
     However, there is a wound infection near the abdomen. There is no surgical site infection.\
-    There is an abscess. Signed, Dr.Doctor MD."
+    There is an abscess  Surgical Sites: There is a surgical site infection. Signed, Dr.Doctor MD."
     rpt_id = 'example_report'
     document = ClinicalTextDocument(text, rpt_id='example_report')
     document.annotate(model)

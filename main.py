@@ -24,8 +24,10 @@ def main():
     # This is defined in models.mention_level_models.py
     # All it requires is the filepaths to the targets and modifiers
     # With either https:// or file://
-    targets = 'https://raw.githubusercontent.com/abchapman93/hai_detect/master/lexicon/targets.tsv'
-    modifiers = 'https://raw.githubusercontent.com/abchapman93/hai_detect/master/lexicon/modifiers.tsv'
+    targets = os.path.abspath('lexicon/targets.tsv')
+    modifiers = os.path.abspath('lexicon/modifiers.tsv')
+    #targets = 'https://raw.githubusercontent.com/abchapman93/hai_detect/master/lexicon/targets.tsv'
+    #modifiers = 'https://raw.githubusercontent.com/abchapman93/hai_detect/master/lexicon/modifiers.tsv'
     model = MentionLevelModel(targets, modifiers)
 
     # Now iterate through each report and annotate using `model`

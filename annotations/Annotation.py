@@ -12,7 +12,7 @@ class Annotation(object):
     """
 
     # Dictionary mapping pyConText target types to eHOST class names
-    _annotation_types = {'organ/space surgical site infection': 'Evidence of SSI',
+    _annotation_schema = {'organ/space surgical site infection': 'Evidence of SSI',
                          'deep surgical site infection': 'Evidence of SSI',
                          'superficial surgical site infection': 'Evidence of SSI',
                          'negated superficial surgical site infection': 'Evidence of SSI',
@@ -87,13 +87,19 @@ class Annotation(object):
 
         # Get category of target
         self.markup_category = tag_object.getCategory()[0]
+        # TODO: Do we want to exclude any markups that aren't in the main categories?
         # Make sure this is an annotation class that we recognize
-        if self.markup_category not in self._annotation_types:
-            raise NotImplementedError("{} is not a valid annotation type, must be one of: {}".format(
-                self.markup_category, set(self._annotation_types.values())
-            ))
+        #if self.markup_category not in self._annotation_schema:
+        #    raise NotImplementedError("{} is not a valid annotation type, must be one of: {}".format(
+        #        self.markup_category, set(self._annotation_schema.values())
+        #    ))
 
-        self.annotation_type = self._annotation_types[self.markup_category]
+        # Try mapping the markup TYPE to one of our categories in _annotation_schema
+        # If it isn't recognized, just use the markup category
+        try:
+            self.annotation_type = self._annotation_schema[self.markup_category]
+        except KeyError:
+            self.annotation_type = self.markup_category
 
         # If the target is a surgical site infection,
         # classify the type
@@ -144,7 +150,7 @@ class Annotation(object):
         if 'surgical site infection' in self.markup_category:
                 self.attributes['anatomy'] = [mod.getLiteral() for mod in markup.getModifiers(tag_object)
                                           if 'anatomy' in mod.getCategory() or
-                                          'surgical site' in mod.getCategory()]
+                                          'surgical_site' in mod.getCategory()]
 
         self.classify()
 
@@ -159,8 +165,10 @@ class Annotation(object):
         Sets object's attribute `classification`.
         Returns classification.
         """
-
-        classification = self._annotation_classifications[self.annotation_type][self.attributes['assertion']]
+        try:
+            classification = self._annotation_classifications[self.annotation_type][self.attributes['assertion']]
+        except KeyError:
+            classification = 'ANNOTATION CLASS UNKNOWN'
         if self.attributes['temporality'] != 'current':
             classification += ' - {}'.format(self.attributes['temporality'].title())
 
@@ -206,7 +214,9 @@ class Annotation(object):
         class_mention = Element("classMention")
         class_mention.set("id", self.id)
         mention_class = SubElement(class_mention, 'mentionClass')
-        mention_class.set('id', self.annotation_type)
+        # TODO: Uncomment this once you get the attributes working
+        #mention_class.set('id', self.annotation_type)
+        mention_class.set('id', self.classification)
         mention_class.text = self.text
 
         # TODO: Add attributes here
