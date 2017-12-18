@@ -13,6 +13,7 @@ from models.mention_level_models import MentionLevelModel
 
 
 def main():
+    print(args.datadir)
     assert os.path.exists(args.datadir)
     # This is the folder that will contain all saved annotations from hai_detect
     outdir = os.path.join(args.datadir, 'hai_detect')
@@ -32,10 +33,16 @@ def main():
 
     # Now iterate through each report and annotate using `model`
     # Save findings in `outdir`
-    for report in reports:
+    for i, report in enumerate(reports):
+        if i % 10 == 0:
+            print("{}/{}".format(i, len(reports)))
         document = ClinicalTextDocument(filepath=report)
         document.annotate(model)
+        #for annotation in document.get_annotations():
+        #    print(annotation)
+        #print()
         document.to_knowtator(outdir)
+
 
 
 if __name__ == '__main__':
