@@ -200,7 +200,11 @@ class Annotation(object):
         It returns two etree elements, annotation_body and class_mention.
         eHOST uses both of these to display an annotation.
         """
+        elements_to_rtn = []  #  A list of elements that will be returned
+                              #  and then appended to the body
         annotation_body = Element('annotation')
+        # TO RETURN
+        elements_to_rtn.append(annotation_body)
 
         mention_id = SubElement(annotation_body, 'mention')
         mention_id.set('id', self.id)
@@ -216,19 +220,52 @@ class Annotation(object):
         creation_date = SubElement(annotation_body, 'creationDate')
         creation_date.text = self.datetime
 
+
         # Now create class_mention
         class_mention = Element("classMention")
         class_mention.set("id", self.id)
+        # TO RETURN
+        elements_to_rtn.append(class_mention)
+        #mention_class.set('id', self.classification)
         mention_class = SubElement(class_mention, 'mentionClass')
-        # TODO: Uncomment this once you get the attributes working
-        #mention_class.set('id', self.annotation_type)
-        mention_class.set('id', self.classification)
+        mention_class.set('id', self.annotation_type)
         mention_class.text = self.text
 
-        # TODO: Add attributes here
+        # Add attributes
+        # ASSERTION
+        # These fields point to stringSlotMention fields that contain  the attributes
+        slot_mention_assertion_id = self.id + '1'
 
+        has_slot_mention_assertion = SubElement(class_mention, 'hasSlotMention')
+        has_slot_mention_assertion.set('id', slot_mention_assertion_id)
 
-        return annotation_body, class_mention
+        string_slot_mention_assertion = Element('stringSlotMention')
+        # TO RETURN
+        elements_to_rtn.append(string_slot_mention_assertion)
+        string_slot_mention_assertion.set('id', slot_mention_assertion_id)
+        mention_slot_assertion = SubElement(string_slot_mention_assertion, 'mentionSlot')
+        mention_slot_assertion.set('id', 'assertion')
+        string_slot_mention_value_assertion = SubElement(string_slot_mention_assertion, 'stringSlotMentionValue')
+        string_slot_mention_value_assertion.set('value', self.attributes['assertion'])
+
+        # TEMPORALITY
+        slot_mention_temporality_id = self.id + '2'
+        has_slot_mention_temporality = SubElement(class_mention, 'hasSlotMention')
+        has_slot_mention_temporality.set('id', slot_mention_temporality_id)
+
+        string_slot_mention_temporality = Element('stringSlotMention')
+        # TO RETURN
+        elements_to_rtn.append(string_slot_mention_temporality)
+        string_slot_mention_temporality.set('id', slot_mention_temporality_id)
+        mention_slot_temporality = SubElement(string_slot_mention_temporality, 'mentionSlot')
+        mention_slot_temporality.set('id', 'temporality')
+        string_slot_mention_value_temporality = SubElement(string_slot_mention_temporality, 'stringSlotMentionValue')
+        string_slot_mention_value_temporality.set('value', self.attributes['temporality'])
+
+        #TODO: 'classification' for SSIs
+        #slot_mention3_id = self.id + '3'
+        return elements_to_rtn
+        #return annotation_body, class_mention
 
 
 

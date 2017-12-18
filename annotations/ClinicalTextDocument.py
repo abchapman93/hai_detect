@@ -104,8 +104,8 @@ class ClinicalTextDocument(object):
         termination_points = '.!?'
         exception_words = ['dr.', 'm.d', 'mr.', 'ms.', 'mrs.', ]
         # Find header points before splitting the text
-        headers = helpers.find_headers(text)
-        header_points = [m.span()[0] for m in headers]
+        #headers = helpers.find_headers(text)
+        #header_points = [m.span()[0] for m in headers]
 
         words = text.split()
 
@@ -126,8 +126,8 @@ class ClinicalTextDocument(object):
             # If you reach a termination point and it's not one of the above exception words,
             # or if we've reacched a header,
             # append this sentence and start a new one
-            if (word[-1] in termination_points and word not in exception_words) or\
-                    span[1] in header_points:
+            if (word[-1] in termination_points and word not in exception_words):
+                    #span[1] in header_points:  # Took this out, instead added a period in preprocessing
                 # Add `current_sentence` and `current_spans` to larger lists
                 sentence_dict['text'] = ' '.join(current_sentence)
                 sentence_dict['words'] = current_sentence
@@ -194,9 +194,9 @@ class ClinicalTextDocument(object):
         root.set('textSource', self.rpt_id + '.txt')
         # TODO:
         for annotation in self.annotations:
-            annotation_body, mention_class = annotation.to_etree()
-            root.append(annotation_body)
-            root.append(mention_class)
+            elements_to_append = annotation.to_etree()
+            for element in elements_to_append:
+                root.append(element)
             #root.append(annotation.to_etree())
             #root.append(annotation.get_xml())
             #root.append(annotation.get_mention_xml())
