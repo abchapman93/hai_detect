@@ -233,9 +233,7 @@ decrease in	HISTORICAL		forward		make regular expression to capture variations
 decrease in	HISTORICAL		forward				
 diminished	HISTORICAL		bidirectional				
 documented	HISTORICAL		forward				
-evolving	HISTORICAL		bidirectional				
-healing	HISTORICAL	\b(healing|healed)\b	bidirectional				
-history of	HISTORICAL		forward				
+evolving	HISTORICAL		bidirectional					history of	HISTORICAL		forward				
 improved	HISTORICAL	improved|improving|improvement	bidirectional			4/2013	
 increase	HISTORICAL	increase|increasing|increased	bidirectional				
 interval change	HISTORICAL		bidirectional				
