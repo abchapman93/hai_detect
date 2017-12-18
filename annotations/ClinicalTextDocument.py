@@ -103,10 +103,9 @@ class ClinicalTextDocument(object):
 
         termination_points = '.!?'
         exception_words = ['dr.', 'm.d', 'mr.', 'ms.', 'mrs.', ]
-        print(text)
+        # Find header points before splitting the text
         headers = helpers.find_headers(text)
         header_points = [m.span()[0] for m in headers]
-        print(headers)
 
         words = text.split()
 
@@ -119,7 +118,6 @@ class ClinicalTextDocument(object):
         current_sentence = []
         current_spans = []
         for word, span in zip(words, spans):
-            print(word, span)
             # Populate `current_sentence` with words
             # and `current_spans` with spans for each word
             current_sentence.append(word)
@@ -137,6 +135,9 @@ class ClinicalTextDocument(object):
                 sentence_dict['span'] = (current_spans[0][0], current_spans[-1][-1])
                 sentence_dict['word_spans'] = current_spans
                 sentences.append(sentence_dict)
+                #if span[1] in header_points:
+                #    print("Split at header")
+                #    print(' '.join(current_sentence))
 
                 # Start a new sentence
                 idx += 1

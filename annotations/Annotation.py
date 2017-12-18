@@ -145,6 +145,12 @@ class Annotation(object):
 
 
         # TODO: Update temporality
+        if 'future' in self.modifier_categories or 'hypothetical' in self.modifier_categories:
+            self.attributes['temporality'] = 'future/hypothetical'
+        if 'historical' in self.modifier_categories:
+            self.attributes['temporality'] = 'historical'
+
+
 
         # Add anatomical sites to instances of surgical site infections
         if 'surgical site infection' in self.markup_category:
