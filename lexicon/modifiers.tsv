@@ -1,8 +1,14 @@
 Lex	Type	Regex	Direction	Unnamed: 4	Unnamed: 5	Unnamed: 6	Codes
-abdomen	ANATOMY		bidirectional	
-surgical site	SURGICAL_SITE		bidirectional	
-wound	SURGICAL_SITE		bidirectional	
-incision	SURGICAL_SITE		
+surgical wound	SURGICAL_SITE	\bsurgical wounds?\b	bidirectional	
+post surgical scar	SURGICAL_SITE	\bpost[- ]?surgical scars?\b	
+surgical incision	SURGICAL_SITE	\bsurgical incisions?\b	bidirectional	
+umbilical	ANATOMY		bidirectional	
+port	ANATOMY	\bport\b	bidirectional	
+midline	ANATOMY		bidirectional	
+abdomen	ANATOMY	\babd(omen|ominal)?\b	bidirectional	
+surgical site	SURGICAL_SITE	\bsurgical sites?\b	bidirectional	
+wound	SURGICAL_SITE	\bwounds?\b	bidirectional	
+incision	SURGICAL_SITE	\bincision(s|al)?\b	
 acute	ACUTE		bidirectional				
 new	ACUTE		bidirectional				
 new from prior exam	ACUTE	new from(\sthe)? prior (exam|study)	bidirectional				
