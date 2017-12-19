@@ -83,6 +83,7 @@ class Annotation(object):
         The tag_object can be obtained by iterating through the list
         returned from`markup.getMarkedTargets()`
         """
+        print(markup)
         self.annotator = 'hai_detect'
         self.id = str(tag_object.getTagID())
 
@@ -143,7 +144,7 @@ class Annotation(object):
             self.attributes['assertion'] = 'negated'
         elif 'definite_existence' in self.modifier_categories:
             self.attributes['assertion'] = 'positive'
-        elif 'definite_negated_existence' in self.modifier_categories:
+        elif 'definite_negated_existence' in self.modifier_categories or 'probable_negated_existence' in self.modifier_categories:
             self.attributes['assertion'] = 'negated'
         elif 'indication' in self.modifier_categories:
             self.attributes['assertion'] = 'indication'
@@ -160,7 +161,7 @@ class Annotation(object):
 
 
         # Add anatomical sites to instances of surgical site infections
-        if 'surgical site infection' in self.markup_category:
+        if 'surgical site infection' in self.markup_category or self.markup_category == 'infection':
                 self.attributes['anatomy'] = [mod.getLiteral() for mod in markup.getModifiers(tag_object)
                                           if 'anatomy' in mod.getCategory() or
                                           'surgical_site' in mod.getCategory()]
@@ -171,11 +172,21 @@ class Annotation(object):
                 and self.attributes['assertion'] == 'positive':
             self.annotation_type = 'Evidence of SSI - No Anatomy'
 
-        # If there is an anatomical site, change 'infection' annotations to 'Evidence of SSI'
-        if self.annotation_type == 'infection' and len(self.attributes['anatomy']) > 0:
-            self.annotation_type = 'Evidence of SSI'
+        # If there is an anatomical site and assertion is positive,
+        # or assertion is negative,
+        # change 'infection' annotations to 'Evidence of SSI'
+        if self.annotation_type == 'infection':
+            print("This is an infection")
+            print(self.attributes['assertion'])
+            print(self.attributes['anatomy'])
+            if self.attributes['assertion'] in ('positive', 'probable') and len(self.attributes['anatomy']) > 0:
+                self.annotation_type = 'Evidence of SSI'
+            elif self.attributes['assertion'] == 'negated':
+                self.annotation_type = 'Evidence of SSI'
 
-        self.classify()
+        classification = self.classify()
+        print(classification)
+
 
 
     def classify(self):
@@ -188,6 +199,7 @@ class Annotation(object):
         Sets object's attribute `classification`.
         Returns classification.
         """
+        print(self.annotation_type)
         try:
             classification = self._annotation_classifications[self.annotation_type][self.attributes['assertion']]
         except KeyError:
@@ -304,7 +316,7 @@ class Annotation(object):
         string += 'Attributes:\n    Assertion: {assertion}\n    Temporality: {temporality}\n'.format(**self.attributes)
         if self.annotation_type == 'Evidence of SSI':
             string += '    Anatomical Sites: {anatomy}\n'.format(**self.attributes)
-            string += '    Infection type: {i}\n'.format(i=self.attributes['infection_type'])
+            #string += '    Infection type: {i}\n'.format(i=self.attributes['infection_type'])
         string += 'Classification: {c}'.format(c=self.classification)
 
         return string
