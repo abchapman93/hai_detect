@@ -2,6 +2,7 @@ Lex	Type	Regex	Direction	Unnamed: 4	Unnamed: 5	Unnamed: 6	Codes
 site	SURGICAL_SITE	\bsites?\b	bidirectional	
 surgical wound	SURGICAL_SITE	\bsurgical wounds?\b	bidirectional	
 post surgical scar	SURGICAL_SITE	\bpost[- ]?surgical scars?\b	
+post operative wound	SURGICAL_SITE	\bpost[- ]?operative wounds?\b	bidirectional	
 surgical incision	SURGICAL_SITE	\bsurgical incisions?\b	bidirectional	
 umbilical	ANATOMY		bidirectional	
 port	ANATOMY	\bport\b	bidirectional	

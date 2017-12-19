@@ -3,20 +3,13 @@ cdi	NEGATED SUPERFICIAL SURGICAL SITE INFECTION	\b(cdi|clean,? dry,? (and )?inta
 abscess	ORGAN/SPACE SURGICAL SITE INFECTION	\babscess(es)?\b	
 infected fluid	ORGAN/SPACE SURGICAL SITE INFECTION	\binfected fluids?\b	
 pneumonia	PNEUMONIA	\bpneumoni(a|ae|as|tis)\b		    
-infected wound	SUPERFICIAL SURGICAL SITE INFECTION	\binfected wound\b	
-postoperative wound infections	SUPERFICIAL SURGICAL SITE INFECTION	\bpost[-\s]?operative wound infections?\b	
-superficial surgical site infection	SUPERFICIAL SURGICAL SITE INFECTION	\bsuperficial (surgical site infections?|ssi)\b	
-superficial wound infection	SUPERFICIAL SURGICAL SITE INFECTION	\bsuperficial wound infections?\b	
 healed	NEGATED SUPERFICIAL SURGICAL SITE INFECTION	\bheal(ed|ing)\b	
-surgical site infection	SUPERFICIAL SURGICAL SITE INFECTION	\bsurgical site infections?\b	
-surgical wound infection	SUPERFICIAL SURGICAL SITE INFECTION	\bsurgical wound infections?\b	
-wound infected	SUPERFICIAL SURGICAL SITE INFECTION	\bwound [a-z\w]?infected\b	
-wound infection	SUPERFICIAL SURGICAL SITE INFECTION	\bwound infect(ion)?\b	
 urinary tract infection	URINARY TRACT INFECTION	\burinary( tract)? infect(ion)?s?\b	
 uti	URINARY TRACT INFECTION	\buti( urinary tract infections?)?s?\b	
 erythema	SUPERFICIAL SURGICAL SITE INFECTION	\berythemas?\b	
 erythematous	SUPERFICIAL SURGICAL SITE INFECTION	\berythematous\b	
-red	SUPERFICIAL SURGICAL SITE INFECTION	\bred(ness)?\b	
+is red	SUPERFICIAL SURGICAL SITE INFECTION			
+redness	SUPERFICIAL SURGICAL SITE INFECTION	\bredness\b	
 purulence	SUPERFICIAL SURGICAL SITE INFECTION	\bpurulen(t|ce)\b	
 pus	SUPERFICIAL SURGICAL SITE INFECTION	\bpus\b	
 soupy	SUPERFICIAL SURGICAL SITE INFECTION	\bsoupy\b	
