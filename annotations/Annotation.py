@@ -16,6 +16,7 @@ class Annotation(object):
                          'deep surgical site infection': 'Evidence of SSI',
                          'superficial surgical site infection': 'Evidence of SSI',
                          'negated superficial surgical site infection': 'Evidence of SSI',
+                          'surgical site infection': 'Evidence of SSI',
                            'urinary tract infection': 'Evidence of UTI',
                            'pneumonia': 'Evidence of Pneumonia'
     }
@@ -105,7 +106,10 @@ class Annotation(object):
         # classify the type
         # ['organ/space', 'superficial', 'deep']
         if 'surgical site infection' in self.markup_category:
-            self.attributes['infection_type'] = re.search('([a-z/]*) surgical site infection', self.markup_category).group(1)
+            try:
+                self.attributes['infection_type'] = re.search('([a-z/]*) surgical site infection', self.markup_category).group(1)
+            except AttributeError:
+                self.attributes['infection_type'] = ''
 
 
         # Get the entire span in sentence.
@@ -117,13 +121,16 @@ class Annotation(object):
         self.span_in_sentence = (min(spans), max(spans))
 
         # Get the span in the entire document.
-        sentence_offset = sentence_span[0]
-        self.span_in_document = (self.span_in_sentence[0] + sentence_offset, self.span_in_sentence[1] + sentence_offset)
+        #sentence_offset = sentence_span[0]
+        #self.span_in_document = (self.span_in_sentence[0] + sentence_offset, self.span_in_sentence[1] + sentence_offset)
+        # NOTE: setting span to entire sentence instead of just the markup span
+        self.span_in_document = sentence_span
 
         # Add the text for the whole sentence
         self.sentence = sentence
         # And for the annotation itself
-        self.text = sentence[self.span_in_sentence[0]:self.span_in_sentence[1]]
+        #self.text = sentence[self.span_in_sentence[0]:self.span_in_sentence[1]]
+        self.text = sentence
 
         # Get categories of the modifiers
         self.modifier_categories.extend([mod.getCategory()[0] for mod in markup.getModifiers(tag_object)])
@@ -157,6 +164,16 @@ class Annotation(object):
                 self.attributes['anatomy'] = [mod.getLiteral() for mod in markup.getModifiers(tag_object)
                                           if 'anatomy' in mod.getCategory() or
                                           'surgical_site' in mod.getCategory()]
+
+        # If there is no anatomical site for a positive surgical site infection
+        # Change the class
+        if self.annotation_type == 'Evidence of SSI' and len(self.attributes['anatomy']) == 0\
+                and self.attributes['assertion'] == 'positive':
+            self.annotation_type = 'Evidence of SSI - No Anatomy'
+
+        # If there is an anatomical site, change 'infection' annotations to 'Evidence of SSI'
+        if self.annotation_type == 'infection' and len(self.attributes['anatomy']) > 0:
+            self.annotation_type = 'Evidence of SSI'
 
         self.classify()
 
