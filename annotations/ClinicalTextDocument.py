@@ -124,7 +124,6 @@ class ClinicalTextDocument(object):
             current_spans.append(span)
 
             # If you reach a termination point and it's not one of the above exception words,
-            # or if we've reacched a header,
             # append this sentence and start a new one
             if (word[-1] in termination_points and word not in exception_words):
                     #span[1] in header_points:  # Took this out, instead added a period in preprocessing
@@ -162,6 +161,7 @@ class ClinicalTextDocument(object):
         For each sentence in self.sentences, the model identifies all findings using pyConText.
         These markups are then used to create Annotations and are added to `sentence['annotations']`
         """
+        to_exclude = ['infection', 'discharge']
         for sentence_num, sentence in enumerate(self.sentences):
             #print(sentence)
             #print(sentence['text'])
@@ -170,13 +170,44 @@ class ClinicalTextDocument(object):
             targets = markup.getMarkedTargets()
 
             # Create annotations out of targets
+            # TODO: Prune overlapping annotations
+            sentence_annotations = []
             for target in targets:
                 annotation = Annotation()
                 annotation.from_markup(target, markup, sentence['text'], sentence['span'])
                 annotation.sentence_num = sentence_num
-                # TODO: decide whether to exclude annotations without anatomy
-                self.sentences_with_annotations.append(sentence_num)
-                self.annotations.append(annotation)
+                sentence_annotations.append(annotation)
+            sentence_annotations = self.prune_annotations(sentence_annotations)
+            for annotation in sentence_annotations:
+                if annotation.annotation_type not in to_exclude:
+                    self.sentences_with_annotations.append(sentence_num)
+                    self.annotations.append(annotation)
+
+    def prune_annotations(self, annotations):
+        """
+        Prunes annotations by collapsing multiple annotations of the same classification within a sentence
+        into one with the largest span
+        """
+        annotation_classifications = set([a.classification for a in annotations])
+        pruned_annotations = []
+        for classification in annotation_classifications:
+            annotations_of_classification = [a for a in annotations if a.classification == classification]
+            if len(annotations_of_classification) == 1:
+                pruned_annotations.append(annotations_of_classification[0])
+                continue
+            # Add information from all of the annotations to the one that will be returned
+            all_anatomical_sites = []
+            for a in annotations_of_classification:
+                all_anatomical_sites.extend(a.attributes['anatomy'])
+            # If anything else needs to be added, do it here
+            first_annotation = annotations_of_classification[0]
+            first_annotation.attributes['anatomy'] = all_anatomical_sites
+            pruned_annotations.append(first_annotation)
+
+        return pruned_annotations
+
+
+
 
 
     def get_annotations(self):
