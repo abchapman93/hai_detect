@@ -255,8 +255,7 @@ no significant change	HISTORICAL		forward
 no significant interval change	HISTORICAL		forward				
 no suspicious change	HISTORICAL		forward	4/16/2013			
 not significantly changed	HISTORICAL		bidirectional				
-now measuring	HISTORICAL		backward				
-old	HISTORICAL		bidirectional				
+now measuring	HISTORICAL		backward					
 on previous exam	HISTORICAL	(on |from )?(previous|prior) exam	bidirectional	need regular expression			
 persistent	HISTORICAL		bidirectional				
 previous	HISTORICAL		bidirectional	3/21/2013	changed to bidirectional		
