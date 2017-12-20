@@ -1,25 +1,25 @@
 Lex	Type	Regex	Direction
+discharge from wound	DISCHARGE		
+infection	INFECTION	\binfect(ed|ion)\b	
 cdi	NEGATED SUPERFICIAL SURGICAL SITE INFECTION	\b(cdi|clean,? dry,? (and )?intact)\b	
+healed	NEGATED SUPERFICIAL SURGICAL SITE INFECTION	\bheal(ed|ing)\b	
+no signs or symptoms of infection	NEGATED SUPERFICIAL SURGICAL SITE INFECTION		
 abscess	ORGAN/SPACE SURGICAL SITE INFECTION	\babscess(es)?\b	
 infected fluid	ORGAN/SPACE SURGICAL SITE INFECTION	\binfected fluids?\b	
 pneumonia	PNEUMONIA	\bpneumoni(a|ae|as|tis)\b		    
-healed	NEGATED SUPERFICIAL SURGICAL SITE INFECTION	\bheal(ed|ing)\b	
-urinary tract infection	URINARY TRACT INFECTION	\burinary( tract)? infect(ion)?s?\b	
-uti	URINARY TRACT INFECTION	\buti( urinary tract infections?)?s?\b	
+pulmonary inflammation	PNEUMONIA	\b((pulmonary|lung) inflammation|inflammation of the lungs?)\b	
+unspecified pneumonia	PNEUMONIA		
 erythema	SUPERFICIAL SURGICAL SITE INFECTION	\berythemas?\b	
 erythematous	SUPERFICIAL SURGICAL SITE INFECTION	\berythematous\b	
 is red	SUPERFICIAL SURGICAL SITE INFECTION			
-redness	SUPERFICIAL SURGICAL SITE INFECTION	\bredness\b	
 purulence	SUPERFICIAL SURGICAL SITE INFECTION	\bpurulen(t|ce)\b	
 pus	SUPERFICIAL SURGICAL SITE INFECTION	\bpus\b	
+redness	SUPERFICIAL SURGICAL SITE INFECTION	\bredness\b	
 soupy	SUPERFICIAL SURGICAL SITE INFECTION	\bsoupy\b	
-pulmonary inflammation	PNEUMONIA	\b((pulmonary|lung) inflammation|inflammation of the lungs?)\b	
-unspecified pneumonia	PNEUMONIA		
 swelling	SUPERFICIAL SURGICAL SITE INFECTION	\bswell(ed|ing)\b	
 swollen	SUPERFICIAL SURGICAL SITE INFECTION		
-discharge from wound	DISCHARGE		
 drainage	SURGICAL SITE INFECTION	\bdrainage\b	
 ooze	SURGICAL SITE INFECTION		
 stitch abscess	SURGICAL SITE INFECTION	\bstitch abscess(es)?\b	
-infection	INFECTION	\binfect(ed|ion)\b	
-no signs or symptoms of infection	NEGATED SUPERFICIAL SURGICAL SITE INFECTION		
+urinary tract infection	URINARY TRACT INFECTION	\burinary( tract)? infect(ion)?s?\b	
+uti	URINARY TRACT INFECTION	\buti( urinary tract infections?)?s?\b	

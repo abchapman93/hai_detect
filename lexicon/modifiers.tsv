@@ -1,16 +1,16 @@
 Lex	Type	Regex	Direction	Unnamed: 4	Unnamed: 5	Unnamed: 6	Codes
-site	SURGICAL_SITE	\bsites?\b	bidirectional	
-surgical wound	SURGICAL_SITE	\bsurgical wounds?\b	bidirectional	
-post surgical scar	SURGICAL_SITE	\bpost[- ]?surgical scars?\b	
-post operative wound	SURGICAL_SITE	\bpost[- ]?operative wounds?\b	bidirectional	
-surgical incision	SURGICAL_SITE	\bsurgical incisions?\b	bidirectional	
-umbilical	ANATOMY		bidirectional	
-port	ANATOMY	\bport\b	bidirectional	
+abdomen	ANATOMY	\b(intra[ -]?)?abd(omen|ominal)?\b	bidirectional	
 midline	ANATOMY		bidirectional	
-abdomen	ANATOMY	\babd(omen|ominal)?\b	bidirectional	
-surgical site	SURGICAL_SITE	\bsurgical sites?\b	bidirectional	
-wound	SURGICAL_SITE	\bwounds?\b	bidirectional	
+port	ANATOMY	\bport\b	bidirectional	
+umbilical	ANATOMY		bidirectional	
 incision	SURGICAL_SITE	\bincision(s|al)?\b	bidirectional
+post operative wound	SURGICAL_SITE	\bpost[- ]?operative wounds?\b	bidirectional	
+post surgical scar	SURGICAL_SITE	\bpost[- ]?surgical scars?\b	
+site	SURGICAL_SITE	\bsites?\b	bidirectional	
+surgical incision	SURGICAL_SITE	\bsurgical incisions?\b	bidirectional	
+surgical site	SURGICAL_SITE	\bsurgical sites?\b	bidirectional	
+surgical wound	SURGICAL_SITE	\bsurgical wounds?\b	bidirectional	
+wound	SURGICAL_SITE	\bwounds?\b	bidirectional	
 acute	ACUTE		bidirectional				
 new	ACUTE		bidirectional				
 new from prior exam	ACUTE	new from(\sthe)? prior (exam|study)	bidirectional				
@@ -348,6 +348,7 @@ declines	PROBABLE_NEGATED_EXISTENCE		forward
 decrease the likelihood	PROBABLE_NEGATED_EXISTENCE	decreas[a-z]+(\sthe)? likelihood	forward				
 denied	PROBABLE_NEGATED_EXISTENCE		forward				
 denies	PROBABLE_NEGATED_EXISTENCE		forward				
+denies any new	PROBABLE_NEGATED_EXISTENCE		forward		
 deny	PROBABLE_NEGATED_EXISTENCE		forward				
 denying	PROBABLE_NEGATED_EXISTENCE		forward				
 is not entirely excluded	PROBABLE_NEGATED_EXISTENCE	(is|was|are|were|does)\snot\s(entirely|totally|definitely|completely\s) excluded	backward	2/28/2013	added definitely	removed ed	
