@@ -102,14 +102,6 @@ class Annotation(object):
         except KeyError:
             self.annotation_type = self.markup_category
 
-        # If the target is a surgical site infection,
-        # classify the type
-        # ['organ/space', 'superficial', 'deep']
-        if 'surgical site infection' in self.markup_category:
-            try:
-                self.attributes['infection_type'] = re.search('([a-z/]*) surgical site infection', self.markup_category).group(1)
-            except AttributeError:
-                self.attributes['infection_type'] = ''
 
 
         # Get the entire span in sentence.
@@ -185,6 +177,15 @@ class Annotation(object):
                 self.annotation_type = 'Evidence of SSI'
             elif self.attributes['assertion'] == 'negated':
                 self.annotation_type = 'Evidence of SSI'
+
+        # If the target is a surgical site infection,
+        # classify the type
+        # ['organ/space', 'superficial', 'deep']
+        if self.annotation_type == 'Evidence of SSI':
+            try:
+                self.attributes['infection_type'] = re.search('([a-z/]*) surgical site infection', self.markup_category).group(1)
+            except AttributeError:
+                self.attributes['infection_type'] = 'superficial'
 
         classification = self.classify()
         #print(classification)
@@ -295,8 +296,28 @@ class Annotation(object):
         string_slot_mention_value_temporality = SubElement(string_slot_mention_temporality, 'stringSlotMentionValue')
         string_slot_mention_value_temporality.set('value', self.attributes['temporality'])
 
-        #TODO: 'classification' for SSIs
-        #slot_mention3_id = self.id + '3'
+        if self.annotation_type != 'Evidence of SSI':
+            return elements_to_rtn
+
+
+        # CLASSIFICATION
+        # Add 'classification' field for 'infection_type'
+        slot_mention_classification_id = self.id + '3'
+        has_slot_mention_classification = SubElement(class_mention, 'hasSlotMention')
+        has_slot_mention_classification.set('id', slot_mention_classification_id)
+
+        string_slot_mention_classification = Element('stringSlotMention')
+        # TO RETURN
+        elements_to_rtn.append(string_slot_mention_classification)
+        string_slot_mention_classification.set('id', slot_mention_classification_id)
+        mention_slot_classification = SubElement(string_slot_mention_classification, 'mentionSlot')
+        mention_slot_classification.set('id', 'classification')
+        string_slot_mention_value_classification = SubElement(string_slot_mention_classification, 'stringSlotMentionValue')
+        string_slot_mention_value_classification.set('value', self.attributes['infection_type'])
+
+
+
+
         return elements_to_rtn
         #return annotation_body, class_mention
 
