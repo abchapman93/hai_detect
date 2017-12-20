@@ -83,7 +83,6 @@ class Annotation(object):
         The tag_object can be obtained by iterating through the list
         returned from`markup.getMarkedTargets()`
         """
-        print(markup)
         self.annotator = 'hai_detect'
         self.id = str(tag_object.getTagID())
 
@@ -166,26 +165,29 @@ class Annotation(object):
                                           if 'anatomy' in mod.getCategory() or
                                           'surgical_site' in mod.getCategory()]
 
+        # TODO: Create a flow chart showing this logic
+
         # If there is no anatomical site for a positive surgical site infection
         # Change the class
         if self.annotation_type == 'Evidence of SSI' and len(self.attributes['anatomy']) == 0\
-                and self.attributes['assertion'] == 'positive':
+                and self.attributes['assertion'] == 'positive'\
+                and self.attributes['temporality'] == 'current':
             self.annotation_type = 'Evidence of SSI - No Anatomy'
 
         # If there is an anatomical site and assertion is positive,
         # or assertion is negative,
         # change 'infection' annotations to 'Evidence of SSI'
         if self.annotation_type == 'infection':
-            print("This is an infection")
-            print(self.attributes['assertion'])
-            print(self.attributes['anatomy'])
+            #print("This is an infection")
+            #print(self.attributes['assertion'])
+            #print(self.attributes['anatomy'])
             if self.attributes['assertion'] in ('positive', 'probable') and len(self.attributes['anatomy']) > 0:
                 self.annotation_type = 'Evidence of SSI'
             elif self.attributes['assertion'] == 'negated':
                 self.annotation_type = 'Evidence of SSI'
 
         classification = self.classify()
-        print(classification)
+        #print(classification)
 
 
 
@@ -199,11 +201,13 @@ class Annotation(object):
         Sets object's attribute `classification`.
         Returns classification.
         """
-        print(self.annotation_type)
+        #print(self.annotation_type)
         try:
             classification = self._annotation_classifications[self.annotation_type][self.attributes['assertion']]
         except KeyError:
-            classification = 'ANNOTATION CLASS UNKNOWN'
+            #print("Unknown:")
+            #print(self.annotation_type)
+            classification = self.annotation_type
         if self.attributes['temporality'] != 'current':
             classification += ' - {}'.format(self.attributes['temporality'].title())
 

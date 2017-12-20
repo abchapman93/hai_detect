@@ -12,6 +12,7 @@ from annotations.ClinicalTextDocument import ClinicalTextDocument
 from models.mention_level_models import MentionLevelModel
 
 
+
 def main():
     print(args.datadir)
     assert os.path.exists(args.datadir)
@@ -40,7 +41,7 @@ def main():
         document.annotate(model)
         #for annotation in document.get_annotations():
         #    print(annotation)
-        #print()
+        #    print()
         document.to_knowtator(outdir)
 
 

@@ -1,1 +1,4 @@
-We examined the patient yesterday. He shows signs of pneumonia. The wound is CDI. He has not developed a urinary tract infection However, there is a wound infection near the abdomen. There is no surgical site infection. There is an abscess. Signed, Dr.Doctor MD.
+We examined the patient yesterday. He shows signs of pneumonia.
+The wound is CDI. He has not developed a urinary tract infection. However, there is a wound infection near the abdomen.
+There is a surgical site infection. There is an abscess. If the the erythema continues, check back in.
+Signed, Dr.Doctor MD.
