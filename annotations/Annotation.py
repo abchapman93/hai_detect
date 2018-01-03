@@ -25,19 +25,19 @@ class Annotation(object):
     # NOTE:
     # May change the value of 'probable' to 'Positive Evidence'
     _annotation_classifications = {'Evidence of SSI': {
-                                        'positive': 'Positive Evidence of SSI',
+                                        'present': 'Positive Evidence of SSI',
                                         'negated': 'Negated Evidence of SSI',
                                         'probable': 'Probable Evidence of SSI',
                                         'indication': 'Indication of SSI'
                                     },
                                     'Evidence of UTI': {
-                                        'positive': 'Positive Evidence of UTI',
+                                        'present': 'Positive Evidence of UTI',
                                         'negated': 'Negated Evidence of UTI',
                                         'probable': 'Probable Evidence of UTI',
                                         'indication': 'Indication of UTI',
                                     },
                                     'Evidence of Pneumonia': {
-                                        'positive': 'Positive Evidence of Pneumonia',
+                                        'present': 'Positive Evidence of Pneumonia',
                                         'negated': 'Negated Evidence of Pneumonia',
                                         'probable': 'Probable Evidence of Pneumonia',
                                         'indication': 'Indication of Pneumonia'
@@ -54,7 +54,7 @@ class Annotation(object):
         self.span_in_document = None
         self.annotation_type = None # eHOST class names: 'Evidence of SSI', 'Evidence of Pneumonia', 'Evidence of UTI'
         self.attributes = {
-            'assertion': 'positive', # positive, probable, negated, indication
+            'assertion': 'present', # present, probable, negated, indication
             'temporality': 'current', # current, historical, future/hypothetical
             'anatomy': [],
         }
@@ -130,11 +130,11 @@ class Annotation(object):
         # Update attributes
         # These will be used later to classify the annotation
         # This is the core logic for classifying markups
-        # `assertion` default value is 'positive'
+        # `assertion` default value is 'present'
         if self.markup_category == 'negated superficial surgical site infection':
             self.attributes['assertion'] = 'negated'
         elif 'definite_existence' in self.modifier_categories:
-            self.attributes['assertion'] = 'positive'
+            self.attributes['assertion'] = 'present'
         elif 'definite_negated_existence' in self.modifier_categories or 'probable_negated_existence' in self.modifier_categories:
             self.attributes['assertion'] = 'negated'
         elif 'indication' in self.modifier_categories:
@@ -146,7 +146,7 @@ class Annotation(object):
         # TODO: Update temporality
         if 'future' in self.modifier_categories or 'hypothetical' in self.modifier_categories:
             self.attributes['temporality'] = 'future/hypothetical'
-        if 'historical' in self.modifier_categories:
+        elif 'historical' in self.modifier_categories:
             self.attributes['temporality'] = 'historical'
 
 
@@ -159,21 +159,21 @@ class Annotation(object):
 
         # TODO: Create a flow chart showing this logic
 
-        # If there is no anatomical site for a positive surgical site infection
+        # If there is no anatomical site for a present surgical site infection
         # Change the class
         if self.annotation_type == 'Evidence of SSI' and len(self.attributes['anatomy']) == 0\
-                and self.attributes['assertion'] == 'positive'\
+                and self.attributes['assertion'] == 'present'\
                 and self.attributes['temporality'] == 'current':
             self.annotation_type = 'Evidence of SSI - No Anatomy'
 
-        # If there is an anatomical site and assertion is positive,
+        # If there is an anatomical site and assertion is present,
         # or assertion is negative,
         # change 'infection' annotations to 'Evidence of SSI'
         if self.annotation_type == 'infection':
             #print("This is an infection")
             #print(self.attributes['assertion'])
             #print(self.attributes['anatomy'])
-            if self.attributes['assertion'] in ('positive', 'probable') and len(self.attributes['anatomy']) > 0:
+            if self.attributes['assertion'] in ('present', 'probable') and len(self.attributes['anatomy']) > 0:
                 self.annotation_type = 'Evidence of SSI'
             elif self.attributes['assertion'] == 'negated':
                 self.annotation_type = 'Evidence of SSI'
@@ -325,7 +325,7 @@ class Annotation(object):
 
     def get_short_string(self):
         """
-        This returns a brief string representation of the annotation
+        This returns a brief string presentation of the annotation
         That can be used for printing ClinicalTextDocuments after annotation
         """
         string = '<annotation '
