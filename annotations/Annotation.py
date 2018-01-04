@@ -62,10 +62,14 @@ class Annotation(object):
         # 'definite negated existence', 'anatomy', ...
         self.modifier_categories = []
         # Will eventually be 'Positive Evidence of SSI', 'Negated Evidence of Pneumonia', ...
-        self.classification = None
+        self._classification = None
         self.annotator = None
 
 
+
+    @property
+    def classification(self):
+        return self._classification
 
 
     def from_ehost(self, xml_tag):
@@ -218,8 +222,9 @@ class Annotation(object):
         if classification == 'Positive Evidence of SSI' and self.attributes['anatomy'] == []:
             classification += ' - No Anatomy'
 
-        self.classification = classification
+        self._classification = classification
         return classification
+
 
 
 
