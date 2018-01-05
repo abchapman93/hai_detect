@@ -3,21 +3,24 @@ abdomen	ANATOMY	\b(intra[ -]?)?abd(omen|ominal)?\b	bidirectional
 midline	ANATOMY		bidirectional	
 port	ANATOMY	\bport\b	bidirectional	
 umbilical	ANATOMY		bidirectional	
-incision	SURGICAL_SITE	\bincision(s|al)?\b	bidirectional
-post operative wound	SURGICAL_SITE	\bpost[- ]?operative wounds?\b	bidirectional	
-post surgical scar	SURGICAL_SITE	\bpost[- ]?surgical scars?\b	
-site	SURGICAL_SITE	\bsites?\b	bidirectional	
-surgical incision	SURGICAL_SITE	\bsurgical incisions?\b	bidirectional	
-surgical site	SURGICAL_SITE	\bsurgical sites?\b	bidirectional	
-surgical wound	SURGICAL_SITE	\bsurgical wounds?\b	bidirectional	
-wound	SURGICAL_SITE	\bwounds?\b	bidirectional	
+incision	SURGICAL SITE	\bincision(s|al)?\b	bidirectional
+post operative wound	SURGICAL SITE	\bpost[- ]?operative wounds?\b	bidirectional	
+post surgical scar	SURGICAL SITE	\bpost[- ]?surgical scars?\b	
+site	SURGICAL SITE	\bsites?\b	bidirectional	
+surgical incision	SURGICAL SITE	\bsurgical incisions?\b	bidirectional	
+surgical site	SURGICAL SITE	\bsurgical sites?\b	bidirectional	
+surgical wound	SURGICAL SITE	\bsurgical wounds?\b	bidirectional	
+wound	SURGICAL SITE	\bwounds?\b	bidirectional	
 jp drain	DRAIN	\bp drains?\b	bidirectional	
 drain	DRAIN	\bdrains?\b	bidirectional	
-superficial surgical site infection	EXPLICIT SUPERFICIAL SURGICAL SITE INFECTION	\b(superficial )?(surgical site infection|ssis?)\b	bidirectional	
+superficial surgical site infection	EXPLICIT SUPERFICIAL SURGICAL SITE INFECTION	\b(superficial )?(surgical site infections?|ssis?)\b	bidirectional	
 deep surgical site infection	EXPLICIT DEEP SURGICAL SITE INFECTION	\bdeep (surgical site infections|ssis?)\b	bidirectional	
-organ/space surgical site infection	EXPLICIT ORGAN/SPACE SURGICAL SITE INFECTION	\borgan/space (surgical site infections|ssis?)\b		
-no signs or symptoms of infection	EXPLICIT NEGATED SUPERFICIAL SURGICAL SITE INFECTION	pneumonia	PNEUMONIA	\bpneumoni(a|ae|as|tis)\b		    
+organ/space surgical site infection	EXPLICIT ORGAN-SPACE SURGICAL SITE INFECTION	\borgan/space (surgical site infections|ssis?)\b		
+no signs or symptoms of infection	EXPLICIT NEGATED SUPERFICIAL SURGICAL SITE INFECTION		
+pneumonia	PNEUMONIA	\bpneumoni(a|ae|as|tis)\b		    
 pulmonary inflammation	PNEUMONIA	\b((pulmonary|lung) inflammation|inflammation of the lungs?)\b	
 unspecified pneumonia	PNEUMONIA		
 urinary tract infection	URINARY TRACT INFECTION	\burinary( tract)? infect(ion)?s?\b	
 uti	URINARY TRACT INFECTION	\buti( urinary tract infections?)?s?\b	
+surgery	PROCEDURE	\bsurgery\b	bidirectional	
+procedure	PROCEDURE	\b(surgical )?procedure\b	bidirectional	

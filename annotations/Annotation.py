@@ -12,7 +12,7 @@ class Annotation(object):
     """
 
     # Dictionary mapping pyConText target types to eHOST class names
-    _annotation_schema = {'organ/space surgical site infection': 'Evidence of SSI',
+    _annotation_schema = {'organ-space surgical site infection': 'Evidence of SSI',
                          'deep surgical site infection': 'Evidence of SSI',
                          'superficial surgical site infection': 'Evidence of SSI',
                          'negated superficial surgical site infection': 'Evidence of SSI',
@@ -56,11 +56,12 @@ class Annotation(object):
         self.attributes = {
             'assertion': 'present', # present, probable, negated, indication
             'temporality': 'current', # current, historical, future/hypothetical
-            'anatomy': [],
         }
 
-        # 'definite negated existence', 'anatomy', ...
+
+        # These attributes will only be populated if this annotation is instantiated from a markup
         self.modifier_categories = []
+        self.markup_category = None
         # Will eventually be 'Positive Evidence of SSI', 'Negated Evidence of Pneumonia', ...
         self._classification = None
         self.annotator = None
@@ -87,12 +88,16 @@ class Annotation(object):
         The tag_object can be obtained by iterating through the list
         returned from`markup.getMarkedTargets()`
         """
+
         self.annotator = 'hai_detect'
         self.id = str(tag_object.getTagID())
 
         # Get category of target
         self.markup_category = tag_object.getCategory()[0]
-        # TODO: Do we want to exclude any markups that aren't in the main categories?
+
+        # Find all modifier categories
+        self.modifier_categories.extend([mod.getCategory()[0] for mod in markup.getModifiers(tag_object)])
+
         # Make sure this is an annotation class that we recognize
         #if self.markup_category not in self._annotation_schema:
         #    raise NotImplementedError("{} is not a valid annotation type, must be one of: {}".format(
@@ -117,10 +122,10 @@ class Annotation(object):
         self.span_in_sentence = (min(spans), max(spans))
 
         # Get the span in the entire document.
-        #sentence_offset = sentence_span[0]
-        #self.span_in_document = (self.span_in_sentence[0] + sentence_offset, self.span_in_sentence[1] + sentence_offset)
-        # NOTE: setting span to entire sentence instead of just the markup span
-        self.span_in_document = sentence_span
+        sentence_offset = sentence_span[0]
+        self.span_in_document = (self.span_in_sentence[0] + sentence_offset, self.span_in_sentence[1] + sentence_offset)
+        # ALTERNATIVE: setting span to entire sentence instead of just the markup span
+        #self.span_in_document = sentence_span
 
         # Add the text for the whole sentence
         self.sentence = sentence
@@ -128,72 +133,164 @@ class Annotation(object):
         #self.text = sentence[self.span_in_sentence[0]:self.span_in_sentence[1]]
         self.text = sentence
 
-        # Get categories of the modifiers
-        self.modifier_categories.extend([mod.getCategory()[0] for mod in markup.getModifiers(tag_object)])
 
         # Update attributes
-        # These will be used later to classify the annotation
-        # This is the core logic for classifying markups
-        # `assertion` default value is 'present'
-        if self.markup_category == 'negated superficial surgical site infection':
+        # Case 1-2, 4: A wound or drain description that implies a surgical site infection
+        # TODO: If `drain` needs to be treated differently, separate it here
+        if self.markup_category in {'anatomy', 'surgical site', 'drain'}:
+            self._set_wound_description()
+
+        # Case 3: An explicit mention of a surgical site infection
+        elif self.markup_category in {'explicit superficial surgical site infection',
+                               'explicit deep surgical site infection',
+                               'explicit organ-space surgical site infection'}:
+            self._set_explicit_ssi()
+
+        elif self.markup_category == 'urinary tract infection':
+            self._set_uti()
+
+        # Case 5: The risks of surgery
+        elif self.markup_category == 'procedure':
+            self._set_risk_of_procedure()
+
+
+        # Now that all of the attributes have been set,
+        # we can implement the classification logic
+        self.classify()
+        print(sentence)
+        print(markup)
+        print(self.classification)
+        print(self.attributes)
+        print()
+
+
+    def _set_wound_description(self):
+        """
+        This method sets the attributes for a markup that has a target of the classes
+        anatomy, surgical site, or drain. Checks for surgical site modifiers.
+        """
+
+        # Cases 1-2: a wound or drain site with description of infection
+        if 'negated superficial surgical site infection' in self.modifier_categories:
+            self.annotation_type = 'Evidence of SSI'
+            self.attributes['ssi_class']= 'superficial' # Corresponds to 'classification' in eHOST schema
+            self.attributes['assertion'] = 'negated' # Automatically set assertion to negated, don't look for mods
+            self._set_temporal_attributes()
+
+        elif 'superficial surgical site infection' in self.modifier_categories:
+            self.annotation_type = 'Evidence of SSI'
+            self.attributes['ssi_class']= 'superficial'
+            self._set_assertion_attributes()
+            self._set_temporal_attributes()
+
+
+        elif 'deep surgical site infection' in self.modifier_categories:
+            self.annotation_type = 'Evidence of SSI'
+            self.attributes['ssi_class']= 'deep'
+            self._set_assertion_attributes()
+            self._set_temporal_attributes()
+
+        elif 'organ-space surgical site infection' in self.modifier_categories:
+            self.annotation_type = 'Evidence of SSI'
+            self.attributes['ssi_class']= 'organ-space'
+            self._set_assertion_attributes()
+            self._set_temporal_attributes()
+
+        # Case 4: An opened wound
+        elif 'dehiscence' in self.modifier_categories:
+            self.annotation_type = 'Evidence of SSI'
+            self.attributes['ssi_class']= 'superficial'
+
+        # Otherwise, this is just a mention of an anatomical or surgical site
+        # Without any evidence for or against infection and will be excluded
+        else:
+            pass
+
+
+    def _set_explicit_ssi(self):
+        """
+        This method sets the attributes for an explicit mention of surgical site infection.
+        Looks at lexical modifiers for assertion and temporality
+        """
+
+        self.annotation_type = 'Evidence of SSI'
+
+        if self.markup_category == 'explicit negated superficial surgical site infection':
+            self.attributes['ssi_class']= 'superficial' # Corresponds to 'classification' in eHOST schema
             self.attributes['assertion'] = 'negated'
-        elif 'definite_existence' in self.modifier_categories:
-            self.attributes['assertion'] = 'present'
-        elif 'definite_negated_existence' in self.modifier_categories or 'probable_negated_existence' in self.modifier_categories:
+
+        else:
+            self.attributes['ssi_class'] = re.search('explicit ([a-z]+) surgical site infection', self.markup_category).group(1)
+            print("Setting attributes for explicit ssi")
+            self._set_assertion_attributes()
+            self._set_temporal_attributes()
+
+
+    def _set_risk_of_procedure(self):
+        """
+        This method checks for infection modifiers and future/hypothetical temporality
+        for targets of class 'procedure'.
+        """
+        ssi_mods = [k for (k, v) in self._annotation_schema.items() if v == 'Evidence of SSI']
+        # Check if any SSI modifiers are present
+        if len(set(self.modifier_categories).intersection(set(ssi_mods))) > 0:
+            print("Here's a procedure")
+            print(self.modifier_categories)
+            # If there are, see if the temporality is future/hypothetical
+            self._set_temporal_attributes()
+            if self.attributes['temporality'] == 'future/hypothetical':
+                self.annotation_type = 'Evidence of SSI'
+                self.attributes['ssi_class'] = 'superficial'
+            else:
+                self.annotation_type = None
+
+
+    def _set_uti(self):
+        """
+        This method sets the attributes for UTI.
+        Looks at lexical modifiers for assertion and temporality
+        """
+        self._set_assertion_attributes()
+        self._set_temporal_attributes()
+
+
+    def _set_pneumonia(self):
+        """
+        This method sets the attributes for UTI.
+        Looks at lexical modifiers for assertion and temporality
+        """
+        self._set_assertion_attributes()
+        self._set_temporal_attributes()
+
+
+    def _set_assertion_attributes(self):
+        """
+        This method sets the attribute 'assertion' in `self.attributes`. Looks for modifiers of classes
+        'negated_existence' or 'probable_existence'. Otherwise is set to 'definite'
+        :return:
+        """
+        if 'definite_negated_existence' in self.modifier_categories or \
+                        'probable_negated_existence' in self.modifier_categories:
             self.attributes['assertion'] = 'negated'
-        elif 'indication' in self.modifier_categories:
-            self.attributes['assertion'] = 'indication'
         elif 'probable_existence' in self.modifier_categories:
             self.attributes['assertion'] = 'probable'
+        else:
+            self.attributes['assertion'] = 'present'
 
 
-        # TODO: Update temporality
+    def _set_temporal_attributes(self):
+        """
+        This methods sets the attributes for temporality for modifiers of class
+        'historical' and 'future/hypothetical'. If there are no modifiers,
+        temporality is set to 'current'
+        """
+        print(self.modifier_categories)
         if 'future' in self.modifier_categories or 'hypothetical' in self.modifier_categories:
             self.attributes['temporality'] = 'future/hypothetical'
         elif 'historical' in self.modifier_categories:
             self.attributes['temporality'] = 'historical'
-
-
-
-        # Add anatomical sites to instances of surgical site infections
-        if 'surgical site infection' in self.markup_category or self.markup_category == 'infection':
-                self.attributes['anatomy'] = [mod.getLiteral() for mod in markup.getModifiers(tag_object)
-                                          if 'anatomy' in mod.getCategory() or
-                                          'surgical_site' in mod.getCategory()]
-
-        # TODO: Create a flow chart showing this logic
-
-        # If there is no anatomical site for a present surgical site infection
-        # Change the class
-        if self.annotation_type == 'Evidence of SSI' and len(self.attributes['anatomy']) == 0\
-                and self.attributes['assertion'] == 'present'\
-                and self.attributes['temporality'] == 'current':
-            self.annotation_type = 'Evidence of SSI - No Anatomy'
-
-        # If there is an anatomical site and assertion is present,
-        # or assertion is negative,
-        # change 'infection' annotations to 'Evidence of SSI'
-        if self.annotation_type == 'infection':
-            #print("This is an infection")
-            #print(self.attributes['assertion'])
-            #print(self.attributes['anatomy'])
-            if self.attributes['assertion'] in ('present', 'probable') and len(self.attributes['anatomy']) > 0:
-                self.annotation_type = 'Evidence of SSI'
-            elif self.attributes['assertion'] == 'negated':
-                self.annotation_type = 'Evidence of SSI'
-
-        # If the target is a surgical site infection,
-        # classify the type
-        # ['organ/space', 'superficial', 'deep']
-        if self.annotation_type == 'Evidence of SSI':
-            try:
-                self.attributes['infection_type'] = re.search('([a-z/]*) surgical site infection', self.markup_category).group(1)
-            except AttributeError:
-                self.attributes['infection_type'] = 'superficial'
-
-        classification = self.classify()
-        #print(classification)
-
+        else:
+            self.attributes['temporality'] = 'current'
 
 
     def classify(self):
@@ -206,21 +303,21 @@ class Annotation(object):
         Sets object's attribute `classification`.
         Returns classification.
         """
-        #print(self.annotation_type)
+
+        if self.annotation_type == None:
+            return None
+
         try:
             classification = self._annotation_classifications[self.annotation_type][self.attributes['assertion']]
         except KeyError:
-            #print("Unknown:")
-            #print(self.annotation_type)
+            print("Unknown:")
+            print(self.annotation_type)
             classification = self.annotation_type
         if self.attributes['temporality'] != 'current':
             classification += ' - {}'.format(self.attributes['temporality'].title())
 
         # Exclude any annotations of a surgical site infection that doesn't have anatomy
         # TODO: Implement coreference resolution in `from_markup()`
-        # TODO: Test whether we actually want to do this
-        if classification == 'Positive Evidence of SSI' and self.attributes['anatomy'] == []:
-            classification += ' - No Anatomy'
 
         self._classification = classification
         return classification
@@ -318,7 +415,7 @@ class Annotation(object):
         mention_slot_classification = SubElement(string_slot_mention_classification, 'mentionSlot')
         mention_slot_classification.set('id', 'classification')
         string_slot_mention_value_classification = SubElement(string_slot_mention_classification, 'stringSlotMentionValue')
-        string_slot_mention_value_classification.set('value', self.attributes['infection_type'])
+        string_slot_mention_value_classification.set('value', self.attributes['ssi_class'])
 
 
 
@@ -345,8 +442,7 @@ class Annotation(object):
              a=self.annotator, s=self.sentence, sp=self.span_in_document, t=self.text)
         string += 'Attributes:\n    Assertion: {assertion}\n    Temporality: {temporality}\n'.format(**self.attributes)
         if self.annotation_type == 'Evidence of SSI':
-            string += '    Anatomical Sites: {anatomy}\n'.format(**self.attributes)
-            #string += '    Infection type: {i}\n'.format(i=self.attributes['infection_type'])
+            string += '    Infection type: {i}\n'.format(i=self.attributes['ssi_class'])
         string += 'Classification: {c}'.format(c=self.classification)
 
         return string

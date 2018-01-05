@@ -175,6 +175,9 @@ class ClinicalTextDocument(object):
             for target in targets:
                 annotation = Annotation()
                 annotation.from_markup(target, markup, sentence['text'], sentence['span'])
+                # If classification is None, this markup should be disregarded
+                if not annotation.classification:
+                    continue
                 annotation.sentence_num = sentence_num
                 sentence_annotations.append(annotation)
             sentence_annotations = self.prune_annotations(sentence_annotations)
@@ -196,12 +199,8 @@ class ClinicalTextDocument(object):
                 pruned_annotations.append(annotations_of_classification[0])
                 continue
             # Add information from all of the annotations to the one that will be returned
-            all_anatomical_sites = []
-            for a in annotations_of_classification:
-                all_anatomical_sites.extend(a.attributes['anatomy'])
             # If anything else needs to be added, do it here
             first_annotation = annotations_of_classification[0]
-            first_annotation.attributes['anatomy'] = all_anatomical_sites
             pruned_annotations.append(first_annotation)
 
         return pruned_annotations

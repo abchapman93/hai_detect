@@ -3,8 +3,8 @@ discharge	SUPERFICIAL SURGICAL SITE INFECTION		bidirectional
 infection	SUPERFICIAL SURGICAL SITE INFECTION	\binfect(ed|ion)\b	bidirectional	
 cdi	NEGATED SUPERFICIAL SURGICAL SITE INFECTION	\b(cdi|clean,? dry,? (and )?intact)\b	bidirectional	
 healed	NEGATED SUPERFICIAL SURGICAL SITE INFECTION	\bheal(ed|ing)\b	bidirectional	
-abscess	ORGAN/SPACE SURGICAL SITE INFECTION	\babscess(es)?\b	bidirectional	
-infected fluid	ORGAN/SPACE SURGICAL SITE INFECTION	\binfected fluids?\b	bidirectional
+abscess	ORGAN-SPACE SURGICAL SITE INFECTION	\babscess(es)?\b	bidirectional	
+infected fluid	ORGAN/SPACE SURGICAL SITE INFECTION	\binfected fluids?\b	bidirectional	
 erythema	SUPERFICIAL SURGICAL SITE INFECTION	\berythemas?\b	bidirectional	
 erythematous	SUPERFICIAL SURGICAL SITE INFECTION	\berythematous\b	bidirectional	
 is red	SUPERFICIAL SURGICAL SITE INFECTION		bidirectional	
@@ -14,7 +14,7 @@ redness	SUPERFICIAL SURGICAL SITE INFECTION	\bredness\b	bidirectional
 soupy	SUPERFICIAL SURGICAL SITE INFECTION	\bsoupy\b	bidirectional	
 drainage	SUPERFICIAL SURGICAL SITE INFECTION	\bdrainage\b	bidirectional	
 ooze	SURGICAL SITE INFECTION	\booz(e|ing)\b	bidirectional	
-stitch abscess	ORGAN/SPACE SURGICAL SITE INFECTION	\bstitch abscess(es)?\b	bidirectional	
+stitch abscess	ORGAN-SPACE SURGICAL SITE INFECTION	\bstitch abscess(es)?\b	bidirectional	
 acute	ACUTE		bidirectional				
 new	ACUTE		bidirectional				
 new from prior exam	ACUTE	new from(\sthe)? prior (exam|study)	bidirectional				
@@ -244,7 +244,8 @@ decrease in	HISTORICAL		forward		make regular expression to capture variations
 decrease in	HISTORICAL		forward				
 diminished	HISTORICAL		bidirectional				
 documented	HISTORICAL		forward				
-evolving	HISTORICAL		bidirectional					history of	HISTORICAL		forward				
+evolving	HISTORICAL		bidirectional					
+history of	HISTORICAL		forward				
 improved	HISTORICAL	improved|improving|improvement	bidirectional			4/2013	
 increase	HISTORICAL	increase|increasing|increased	bidirectional				
 interval change	HISTORICAL		bidirectional				
@@ -392,3 +393,4 @@ not extend	PSEUDONEG		forward
 not necessarily	PSEUDONEG		forward				
 not only	PSEUDONEG		forward				
 without difficulty	PSEUDONEG		forward				
+risk	HYPOTHETICAL	\brisks?\b	forward	
