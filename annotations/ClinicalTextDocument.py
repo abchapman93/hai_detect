@@ -101,7 +101,8 @@ class ClinicalTextDocument(object):
             list of sentences and spans
         """
 
-        termination_points = '.!?'
+        termination_points = '.!?;'
+        termination_words = ['a/p:'] # Words to terminate at that we didn't catch in preprocessing
         exception_words = ['dr.', 'm.d', 'mr.', 'ms.', 'mrs.', ]
         # Find header points before splitting the text
         #headers = helpers.find_headers(text)
@@ -125,7 +126,7 @@ class ClinicalTextDocument(object):
 
             # If you reach a termination point and it's not one of the above exception words,
             # append this sentence and start a new one
-            if (word[-1] in termination_points and word not in exception_words):
+            if (word in termination_words) or (word[-1] in termination_points and word not in exception_words):
                     #span[1] in header_points:  # Took this out, instead added a period in preprocessing
                 # Add `current_sentence` and `current_spans` to larger lists
                 sentence_dict['text'] = ' '.join(current_sentence)
