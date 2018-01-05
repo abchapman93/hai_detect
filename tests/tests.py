@@ -50,6 +50,11 @@ class TestAnnotations(unittest.TestCase):
         self.doc5.annotate(self.model)
         self.annotation_hist_ssi5 = self.doc5.annotations[0]
 
+        self.doc6 = ClinicalTextDocument.ClinicalTextDocument('There were complications due to pneumonia that was likely\
+                                                              present at the time of surgery.')
+        self.doc6.annotate(self.model)
+        self.annotation_hist_ssi6 = self.doc6.annotations[0]
+
 
     def test_modifiers_load(self):
         try:
@@ -87,6 +92,9 @@ class TestAnnotations(unittest.TestCase):
     def test_doc5_has_hist_mod(self):
         self.assertEqual(self.annotation_hist_ssi5.attributes['temporality'], 'historical')
         #self.assertEqual()
+
+    def test_doc6_has_hist_patos(self):
+        self.assertEqual(self.annotation_hist_ssi6.attributes['temporality'], 'historical')
 
 
 

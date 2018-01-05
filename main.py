@@ -39,9 +39,9 @@ def main():
             print("{}/{}".format(i, len(reports)))
         document = ClinicalTextDocument(filepath=report)
         document.annotate(model)
-        #for annotation in document.get_annotations():
-            #print(annotation)
-            #print()
+        for annotation in document.get_annotations():
+            print(annotation)
+            print()
         document.to_knowtator(outdir)
 
 
