@@ -3,6 +3,8 @@ discharge	SUPERFICIAL SURGICAL SITE INFECTION		bidirectional
 infection	SUPERFICIAL SURGICAL SITE INFECTION	\binfect(ed|ion)\b	bidirectional	
 cdi	NEGATED SUPERFICIAL SURGICAL SITE INFECTION	\b(cdi|clean,? dry,? (and )?intact)\b	bidirectional	
 healed	NEGATED SUPERFICIAL SURGICAL SITE INFECTION	\bheal(ed|ing)\b	bidirectional	
+serosanguinous	NEGATED SUPERFICIAL SURGICAL SITE INFECTION		bidirectional	
+in place	NEGATED SUPERFICIAL SURGICAL SITE INFECTION		bidirectional	
 abscess	ORGAN-SPACE SURGICAL SITE INFECTION	\babscess(es)?\b	bidirectional	
 infected fluid	ORGAN/SPACE SURGICAL SITE INFECTION	\binfected fluids?\b	bidirectional	
 erythema	SUPERFICIAL SURGICAL SITE INFECTION	\berythemas?\b	bidirectional	
@@ -10,11 +12,17 @@ erythematous	SUPERFICIAL SURGICAL SITE INFECTION	\berythematous\b	bidirectional
 is red	SUPERFICIAL SURGICAL SITE INFECTION		bidirectional	
 purulence	SUPERFICIAL SURGICAL SITE INFECTION	\bpurulen(t|ce)\b	bidirectional	
 pus	SUPERFICIAL SURGICAL SITE INFECTION	\bpus\b	bidirectional	
-redness	SUPERFICIAL SURGICAL SITE INFECTION	\bredness\b	bidirectional	
+redness	SUPERFICIAL SURGICAL SITE INFECTION	\b redness\b	bidirectional	
 soupy	SUPERFICIAL SURGICAL SITE INFECTION	\bsoupy\b	bidirectional	
 drainage	SUPERFICIAL SURGICAL SITE INFECTION	\bdrainage\b	bidirectional	
 ooze	SURGICAL SITE INFECTION	\booz(e|ing)\b	bidirectional	
 stitch abscess	ORGAN-SPACE SURGICAL SITE INFECTION	\bstitch abscess(es)?\b	bidirectional	
+to open	DEHISCENCE	\bto open\b	bidirectional	
+I opened	DEHISCENCE	i opened	bidirectional	
+opened	DEHISCENCE	\bopen?\b	bidirectional	
+dehiscence	DEHISCENCE		bidirectional	
+present at the time of surgery	HISTORICAL	\bpresent at the time of surgery\b	bidirectional	
+present at the time of surgery	HISTORICAL	\bpatos\b	bidirectional	
 acute	ACUTE		bidirectional				
 new	ACUTE		bidirectional				
 new from prior exam	ACUTE	new from(\sthe)? prior (exam|study)	bidirectional				
@@ -393,4 +401,4 @@ not extend	PSEUDONEG		forward
 not necessarily	PSEUDONEG		forward				
 not only	PSEUDONEG		forward				
 without difficulty	PSEUDONEG		forward				
-risk	HYPOTHETICAL	\brisks?\b	forward	
+risk	HYPOTHETICAL	\brisks?\b	forward		

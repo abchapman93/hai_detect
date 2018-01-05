@@ -26,20 +26,20 @@ class Annotation(object):
     # May change the value of 'probable' to 'Positive Evidence'
     _annotation_classifications = {'Evidence of SSI': {
                                         'present': 'Positive Evidence of SSI',
+                                        'probable': 'Positive Evidence of SSI',
                                         'negated': 'Negated Evidence of SSI',
-                                        'probable': 'Probable Evidence of SSI',
                                         'indication': 'Indication of SSI'
                                     },
                                     'Evidence of UTI': {
                                         'present': 'Positive Evidence of UTI',
+                                        'probable': 'Positive Evidence of UTI',
                                         'negated': 'Negated Evidence of UTI',
-                                        'probable': 'Probable Evidence of UTI',
                                         'indication': 'Indication of UTI',
                                     },
                                     'Evidence of Pneumonia': {
                                         'present': 'Positive Evidence of Pneumonia',
+                                        'probable': 'Postive Evidence of Pneumonia',
                                         'negated': 'Negated Evidence of Pneumonia',
-                                        'probable': 'Probable Evidence of Pneumonia',
                                         'indication': 'Indication of Pneumonia'
                                     }
     }
@@ -122,10 +122,10 @@ class Annotation(object):
         self.span_in_sentence = (min(spans), max(spans))
 
         # Get the span in the entire document.
-        sentence_offset = sentence_span[0]
-        self.span_in_document = (self.span_in_sentence[0] + sentence_offset, self.span_in_sentence[1] + sentence_offset)
+        #sentence_offset = sentence_span[0]
+        #self.span_in_document = (self.span_in_sentence[0] + sentence_offset, self.span_in_sentence[1] + sentence_offset)
         # ALTERNATIVE: setting span to entire sentence instead of just the markup span
-        #self.span_in_document = sentence_span
+        self.span_in_document = sentence_span
 
         # Add the text for the whole sentence
         self.sentence = sentence
@@ -148,6 +148,9 @@ class Annotation(object):
 
         elif self.markup_category == 'urinary tract infection':
             self._set_uti()
+
+        elif self.markup_category == 'pneumonia':
+            self._set_pneumonia()
 
         # Case 5: The risks of surgery
         elif self.markup_category == 'procedure':
@@ -190,6 +193,8 @@ class Annotation(object):
             self.attributes['ssi_class']= 'organ-space'
             self._set_assertion_attributes()
             self._set_temporal_attributes()
+
+
 
         # Case 4: An opened wound
         elif 'dehiscence' in self.modifier_categories:
@@ -295,7 +300,7 @@ class Annotation(object):
         Returns classification.
         """
 
-        if self.annotation_type == None:
+        if self.annotation_type == None or self.annotation_type not in self._annotation_classifications:
             return None
 
         try:
