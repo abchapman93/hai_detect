@@ -1,0 +1,153 @@
+<annotations textSource="example.txt">
+  <annotation>
+    <mention id="115004829850514214288261239058027033064"/>
+    <annotator id="eHOST_2010">hai_detect</annotator>
+    <span end="62" start="44"/>
+    <spannedText>signs of pneumonia</spannedText>
+    <creationDate>12182017 07:40:05</creationDate>
+  </annotation>
+  <classMention id="115004829850514214288261239058027033064">
+    <mentionClass id="Evidence of Pneumonia">signs of pneumonia</mentionClass>
+    <hasSlotMention id="1150048298505142142882612390580270330641"/>
+    <hasSlotMention id="1150048298505142142882612390580270330642"/>
+  </classMention>
+  <stringSlotMention id="1150048298505142142882612390580270330641">
+    <mentionSlot id="assertion"/>
+    <stringSlotMentionValue value="probable"/>
+  </stringSlotMention>
+  <stringSlotMention id="1150048298505142142882612390580270330642">
+    <mentionSlot id="temporality"/>
+    <stringSlotMentionValue value="current"/>
+  </stringSlotMention>
+  <annotation>
+    <mention id="115006151217808627189423211714385064424"/>
+    <annotator id="eHOST_2010">hai_detect</annotator>
+    <span end="80" start="68"/>
+    <spannedText>wound is cdi</spannedText>
+    <creationDate>12182017 07:40:05</creationDate>
+  </annotation>
+  <classMention id="115006151217808627189423211714385064424">
+    <mentionClass id="Evidence of SSI">wound is cdi</mentionClass>
+    <hasSlotMention id="1150061512178086271894232117143850644241"/>
+    <hasSlotMention id="1150061512178086271894232117143850644242"/>
+  </classMention>
+  <stringSlotMention id="1150061512178086271894232117143850644241">
+    <mentionSlot id="assertion"/>
+    <stringSlotMentionValue value="negated"/>
+  </stringSlotMention>
+  <stringSlotMention id="1150061512178086271894232117143850644242">
+    <mentionSlot id="temporality"/>
+    <stringSlotMentionValue value="current"/>
+  </stringSlotMention>
+  <annotation>
+    <mention id="115007962373603703273287359737516044776"/>
+    <annotator id="eHOST_2010">hai_detect</annotator>
+    <span end="128" start="89"/>
+    <spannedText>not developed a urinary tract infection</spannedText>
+    <creationDate>12182017 07:40:05</creationDate>
+  </annotation>
+  <classMention id="115007962373603703273287359737516044776">
+    <mentionClass id="Evidence of UTI">not developed a urinary tract infection</mentionClass>
+    <hasSlotMention id="1150079623736037032732873597375160447761"/>
+    <hasSlotMention id="1150079623736037032732873597375160447762"/>
+  </classMention>
+  <stringSlotMention id="1150079623736037032732873597375160447761">
+    <mentionSlot id="assertion"/>
+    <stringSlotMentionValue value="negated"/>
+  </stringSlotMention>
+  <stringSlotMention id="1150079623736037032732873597375160447762">
+    <mentionSlot id="temporality"/>
+    <stringSlotMentionValue value="current"/>
+  </stringSlotMention>
+  <annotation>
+    <mention id="115009386103684084600279988608260682216"/>
+    <annotator id="eHOST_2010">hai_detect</annotator>
+    <span end="182" start="150"/>
+    <spannedText>wound infection near the abdomen</spannedText>
+    <creationDate>12182017 07:40:05</creationDate>
+  </annotation>
+  <classMention id="115009386103684084600279988608260682216">
+    <mentionClass id="Evidence of SSI">wound infection near the abdomen</mentionClass>
+    <hasSlotMention id="1150093861036840846002799886082606822161"/>
+    <hasSlotMention id="1150093861036840846002799886082606822162"/>
+  </classMention>
+  <stringSlotMention id="1150093861036840846002799886082606822161">
+    <mentionSlot id="assertion"/>
+    <stringSlotMentionValue value="positive"/>
+  </stringSlotMention>
+  <stringSlotMention id="1150093861036840846002799886082606822162">
+    <mentionSlot id="temporality"/>
+    <stringSlotMentionValue value="current"/>
+  </stringSlotMention>
+  <annotation>
+    <mention id="115010651377439437401917427741406835176"/>
+    <annotator id="eHOST_2010">hai_detect</annotator>
+    <span end="219" start="193"/>
+    <spannedText>no surgical site infection</spannedText>
+    <creationDate>12182017 07:40:05</creationDate>
+  </annotation>
+  <classMention id="115010651377439437401917427741406835176">
+    <mentionClass id="Evidence of SSI">no surgical site infection</mentionClass>
+    <hasSlotMention id="1150106513774394374019174277414068351761"/>
+    <hasSlotMention id="1150106513774394374019174277414068351762"/>
+  </classMention>
+  <stringSlotMention id="1150106513774394374019174277414068351761">
+    <mentionSlot id="assertion"/>
+    <stringSlotMentionValue value="negated"/>
+  </stringSlotMention>
+  <stringSlotMention id="1150106513774394374019174277414068351762">
+    <mentionSlot id="temporality"/>
+    <stringSlotMentionValue value="current"/>
+  </stringSlotMention>
+  <annotation>
+    <mention id="115011644898597366278043916272245715432"/>
+    <annotator id="eHOST_2010">hai_detect</annotator>
+    <span end="240" start="233"/>
+    <spannedText>abscess</spannedText>
+    <creationDate>12182017 07:40:05</creationDate>
+  </annotation>
+  <classMention id="115011644898597366278043916272245715432">
+    <mentionClass id="Evidence of SSI">abscess</mentionClass>
+    <hasSlotMention id="1150116448985973662780439162722457154321"/>
+    <hasSlotMention id="1150116448985973662780439162722457154322"/>
+  </classMention>
+  <stringSlotMention id="1150116448985973662780439162722457154321">
+    <mentionSlot id="assertion"/>
+    <stringSlotMentionValue value="positive"/>
+  </stringSlotMention>
+  <stringSlotMention id="1150116448985973662780439162722457154322">
+    <mentionSlot id="temporality"/>
+    <stringSlotMentionValue value="current"/>
+  </stringSlotMention>
+  <annotation>
+    <mention id="115012820644529077962686738959501406696"/>
+    <annotator id="eHOST_2010">hai_detect</annotator>
+    <span end="261" start="242"/>
+    <spannedText>if the the erythema</spannedText>
+    <creationDate>12182017 07:40:05</creationDate>
+  </annotation>
+  <classMention id="115012820644529077962686738959501406696">
+    <mentionClass id="Evidence of SSI">if the the erythema</mentionClass>
+    <hasSlotMention id="1150128206445290779626867389595014066961"/>
+    <hasSlotMention id="1150128206445290779626867389595014066962"/>
+  </classMention>
+  <stringSlotMention id="1150128206445290779626867389595014066961">
+    <mentionSlot id="assertion"/>
+    <stringSlotMentionValue value="positive"/>
+  </stringSlotMention>
+  <stringSlotMention id="1150128206445290779626867389595014066962">
+    <mentionSlot id="temporality"/>
+    <stringSlotMentionValue value="future/hypothetical"/>
+  </stringSlotMention>
+  <eHOST_Adjudication_status version="1.0">
+    <Adjudication_Selected_Annotators version="1.0"/>
+    <Adjudication_Selected_Classes version="1.0"/>
+    <Adjudication_Others>
+      <CHECK_OVERLAPPED_SPANS>false</CHECK_OVERLAPPED_SPANS>
+      <CHECK_ATTRIBUTES>false</CHECK_ATTRIBUTES>
+      <CHECK_RELATIONSHIP>false</CHECK_RELATIONSHIP>
+      <CHECK_CLASS>false</CHECK_CLASS>
+      <CHECK_COMMENT>false</CHECK_COMMENT>
+    </Adjudication_Others>
+  </eHOST_Adjudication_status>
+</annotations>

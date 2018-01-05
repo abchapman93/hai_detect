@@ -1,0 +1,38 @@
+<annotations textSource="short_example.txt">
+  <annotation>
+    <mention id="220762420100370222474789595592169927144"/>
+    <annotator id="eHOST_2010">hai_detect</annotator>
+    <span end="34" start="11"/>
+    <spannedText>there is a surgical site infection.</spannedText>
+    <creationDate>01052018 12:50:15</creationDate>
+  </annotation>
+  <classMention id="220762420100370222474789595592169927144">
+    <mentionClass id="Evidence of SSI">there is a surgical site infection.</mentionClass>
+    <hasSlotMention id="2207624201003702224747895955921699271441"/>
+    <hasSlotMention id="2207624201003702224747895955921699271442"/>
+    <hasSlotMention id="2207624201003702224747895955921699271443"/>
+  </classMention>
+  <stringSlotMention id="2207624201003702224747895955921699271441">
+    <mentionSlot id="assertion"/>
+    <stringSlotMentionValue value="present"/>
+  </stringSlotMention>
+  <stringSlotMention id="2207624201003702224747895955921699271442">
+    <mentionSlot id="temporality"/>
+    <stringSlotMentionValue value="current"/>
+  </stringSlotMention>
+  <stringSlotMention id="2207624201003702224747895955921699271443">
+    <mentionSlot id="classification"/>
+    <stringSlotMentionValue value="superficial"/>
+  </stringSlotMention>
+  <eHOST_Adjudication_status version="1.0">
+    <Adjudication_Selected_Annotators version="1.0"/>
+    <Adjudication_Selected_Classes version="1.0"/>
+    <Adjudication_Others>
+      <CHECK_OVERLAPPED_SPANS>false</CHECK_OVERLAPPED_SPANS>
+      <CHECK_ATTRIBUTES>false</CHECK_ATTRIBUTES>
+      <CHECK_RELATIONSHIP>false</CHECK_RELATIONSHIP>
+      <CHECK_CLASS>false</CHECK_CLASS>
+      <CHECK_COMMENT>false</CHECK_COMMENT>
+    </Adjudication_Others>
+  </eHOST_Adjudication_status>
+</annotations>
