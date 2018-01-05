@@ -157,11 +157,6 @@ class Annotation(object):
         # Now that all of the attributes have been set,
         # we can implement the classification logic
         self.classify()
-        print(sentence)
-        print(markup)
-        print(self.classification)
-        print(self.attributes)
-        print()
 
 
     def _set_wound_description(self):
@@ -284,7 +279,6 @@ class Annotation(object):
         'historical' and 'future/hypothetical'. If there are no modifiers,
         temporality is set to 'current'
         """
-        print(self.modifier_categories)
         if 'future' in self.modifier_categories or 'hypothetical' in self.modifier_categories:
             self.attributes['temporality'] = 'future/hypothetical'
         elif 'historical' in self.modifier_categories:
@@ -310,8 +304,6 @@ class Annotation(object):
         try:
             classification = self._annotation_classifications[self.annotation_type][self.attributes['assertion']]
         except KeyError:
-            print("Unknown:")
-            print(self.annotation_type)
             classification = self.annotation_type
         if self.attributes['temporality'] != 'current':
             classification += ' - {}'.format(self.attributes['temporality'].title())
