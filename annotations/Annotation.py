@@ -216,7 +216,6 @@ class Annotation(object):
 
         else:
             self.attributes['ssi_class'] = re.search('explicit ([a-z]+) surgical site infection', self.markup_category).group(1)
-            print("Setting attributes for explicit ssi")
             self._set_assertion_attributes()
             self._set_temporal_attributes()
 
@@ -229,8 +228,6 @@ class Annotation(object):
         ssi_mods = [k for (k, v) in self._annotation_schema.items() if v == 'Evidence of SSI']
         # Check if any SSI modifiers are present
         if len(set(self.modifier_categories).intersection(set(ssi_mods))) > 0:
-            print("Here's a procedure")
-            print(self.modifier_categories)
             # If there are, see if the temporality is future/hypothetical
             self._set_temporal_attributes()
             if self.attributes['temporality'] == 'future/hypothetical':
