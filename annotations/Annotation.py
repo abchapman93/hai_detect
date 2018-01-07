@@ -459,6 +459,84 @@ class Annotation(object):
 
         return string
 
+class AnnotationComparison(object):
+    """
+    This class is used to compare two overlapping annotations.
+    Parameters:
+        a: the first Annotation which should be considered the gold standard
+        b: the second overlapping Annotation which will be evaluated against a
+        rpt_id: the name of the report the annotations were created from
+        assert_map: a dictionary mapping assertion values to integers that define which
+             should be considered a match. For example, if 'probable' and 'definite'
+            should be considered matches, they could both map to 0.
+            and 'negated' could map to 1. This is the default setting.
+        temp_map: a dictionary mapping temporality values similar to assert_map.
+
+    """
+
+    def __init__(self, a, b, rpt_id='classification', assert_map={}, temp_map={}):
+        self.a = a
+        self.b = b
+        self.rpt_id = rpt_id
+
+        if len(assert_map) == 0:
+            self.assert_map = {
+            'definite': 0,
+            'probable': 0,
+            'negated': 1
+        }
+        else:
+            self.assert_map = assert_map
+
+        if len(temp_map) == 0:
+            self.temp_map = {
+            'current': 0,
+            'historical': 1,
+            'future/hypothetical':
+        }
+        else:
+            self.temp_map = temp_map
+
+    @property
+    def is_match(self):
+        return self.compare_annotations()
+
+
+    def compare_annotations(self):
+        """
+        Checks whether annotation type, assertion, and temporality are equal between the two Annotations.
+        Assertion and Temporality matches are defined by assert_map and temp_map.
+        :returns Boolean
+        """
+        return self.compare_classification() & self.compare_assertion() & self.compare_temporality()
+
+
+    def compare_classification(self):
+        """
+        This method checks whether the classifications of
+        the two annotations are exactly the same.
+        """
+        return self.a.classification() == self.b.classification()
+
+
+    def compare_assertion(self):
+        """
+        Compares assertion of both Annotations.
+        In this schema, 'definite' and 'probable' are considered equal
+        """
+
+        return self.assert_map[self.a.attributes['assertion']] == \
+            self.assert_map[self.b.attributes['assertion']]
+
+
+    def compare_temporality(self):
+        """
+        Compares temporality of both Annotations.
+        :return:
+        """
+
+        return self.temp_map[self.a.attributes['temporality']] == \
+               self.temp_map[self.b.attributes['temporality']]
 
 
 
