@@ -1,3 +1,21 @@
+"""
+This module contains two classes that are used for creating and evaluating NLP findings.
+The first is `Annotation`, which can be instantiated using either a pyConText markup or an pandas Series from Excel.
+The Annotation object keeps track of temporality, assertion and the class of the findings.
+It has the following main attributes:
+    - `Annotation.classification`: this is a string representing the final evaluation of the finding. This is created
+        based on the logic in `Annotaiton.classify()` and is decided based on annotation_type, temporality, and assertion.
+    - `Annotation.annotation_type`: a string representing the class of the finding. This matches the `Class` field in
+        an eHOST annotation.
+    - `Annotation.attributes`: this is a dictionary that is meant to match the `attributes` in an eHOST annotation.
+        It contains these subfields:
+        -- `assertion`: whether the finding is negated or postive.
+        -- `temporality`: whether the finding currently exists, has in the past, or is a future/hypothetical risk.
+
+The second is `AnnotationComparison`, which is used to compare two overlapping annotations and decide whether they are
+a match.
+"""
+
 import re
 from datetime import datetime
 #from xml.etree.ElementTree import Element, SubElement
@@ -12,6 +30,7 @@ class Annotation(object):
     """
 
     # Dictionary mapping pyConText target types to eHOST class names
+    # pyConText target => Annotation.annotation_type
     _annotation_schema = {'organ-space surgical site infection': 'Evidence of SSI',
                          'deep surgical site infection': 'Evidence of SSI',
                          'superficial surgical site infection': 'Evidence of SSI',
@@ -23,7 +42,6 @@ class Annotation(object):
 
     # Classifications based on assertion
     # NOTE:
-    # May change the value of 'probable' to 'Positive Evidence'
     _annotation_classifications = {'Evidence of SSI': {
                                         'present': 'Positive Evidence of SSI',
                                         'probable': 'Positive Evidence of SSI',
@@ -440,6 +458,9 @@ class Annotation(object):
         string += 'Classification: {c}'.format(c=self.classification)
 
         return string
+
+
+
 
 if __name__ == '__main__':
     annotation = Annotation()
