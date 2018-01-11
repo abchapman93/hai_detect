@@ -2,7 +2,7 @@ import re
 from datetime import datetime
 #from xml.etree.ElementTree import Element, SubElement
 from lxml.etree import Element, SubElement
-
+from hai_exceptions.exceptions import MalformedeHostExcelRow
 
 class Annotation(object):
     """
@@ -67,11 +67,33 @@ class Annotation(object):
 
 
 
-
     def from_ehost(self, xml_tag):
         pass
-
-
+    
+    def from_ehost_xlsx(self, row):
+        ''' frst check and make sure the row is wellformed'''
+        max_col_size = 11
+        min_col_size = 5
+        col_size = len(row)
+        if ( col_size < min_col_size):
+             raise MalformedeHostExcelRow
+        
+        
+        self.sentence = row[2].value
+        self.annotation_type = row[4].value
+        
+        if (col_size < max_col_size): max_col_size = col_size 
+        
+        for i in range(4, max_col_size): # we only care up to the max
+            cell = row[i]
+            if (cell.value is not None): 
+                if (i % 2 == 1 and i < col_size-1):
+                    self.attributes[cell.value] = row[i+1].value
+        pass
+        
+        
+        
+    
     def from_markup(self, tag_object, markup, sentence, sentence_span):
         """
         Takes a markup and a tag_object, a target node from that markup.
