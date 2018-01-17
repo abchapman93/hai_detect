@@ -65,7 +65,22 @@ class ClinicalTextDocument(object):
         # While maintaining the original text spans
         self.sentences = self.split_sentences(self.preprocessed_text, self.original_spans)
 
-
+    def cal_diff_score(self, other):
+        
+        total_len = len(self.annotations) + len(other.annotations)
+        
+        match_len = 0 
+        score = 0
+        
+        for ann1 in self.annotations:
+            for ann2 in other.annotations:
+                if (ann1.isSimilar(ann2)):
+                    match_len += 2 #both sides
+        
+        score = match_len / total_len
+        
+        return score
+        pass
     
 
     def from_filepath(self, filepath):

@@ -96,11 +96,8 @@ class Annotation(object):
             raise MalformedSpanValue
         
         
-        
-            
-        
-        
-        if (col_size < max_col_size): max_col_size = col_size 
+        if (col_size < max_col_size): 
+                max_col_size = col_size 
         
         for i in range(4, max_col_size): # we only care up to the max
             cell = row[i]
@@ -275,10 +272,10 @@ class Annotation(object):
         left_span = tups[0]
         right_span = tups[1]
         
-        total_val = left_span[1]-left_span[0]
-        overlap = left_span[1]-right_span[0]
+        total_val = left_span[1]-left_span[0] #cal the total size
+        overlap = left_span[1]-right_span[0] # cal the area of overlap. (left is always less)
         
-        overlap_ratio = (overlap / total_val)  
+        overlap_ratio = (overlap / total_val) #cal ratio of overlap. the  
      
         
         if (overlap_ratio >= threshold ): 
@@ -287,11 +284,19 @@ class Annotation(object):
         return False
             
         
-
+    def isSimilar(self, other):
+        if (isinstance(self, other.__class__)):
+            if (self.isOverlap(other)
+                and self.classification == other.classification
+                and self.attributes == other.attributes):
+                
+                return True
+                    
+        return False
         
-    def compare(self, second_annotation):
-        if (self.id == second_annotation.id):
-            return 0
+        
+    def compare(self, other):
+        pass
         
         
 

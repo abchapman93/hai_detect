@@ -167,7 +167,112 @@ class test_Annotation(unittest.TestCase):
         right.span_in_sentence = (9, 11)
         self.assertFalse(self._anno_overlap(left, right))
         
+    def test_isSimilar(self):
+        left = Annotation()
+        right = Annotation()
+        self.assertFalse(left.isSimilar(right)) #empty annotation are not similar
         
+        left.span_in_sentence = (1,10)
+        right.span_in_sentence = (2,10)
+        self.assertTrue(left.isSimilar(right)) #overlap and empty then is similar
+
+
+        left.span_in_sentence = (1,10)
+        right.span_in_sentence = (2,10)
+        left.classification = "SSI"
+        right.classification = ""
+        self.assertFalse(left.isSimilar(right)) #overlap but attri differs 
+        
+        left.span_in_sentence = (1,10)
+        right.span_in_sentence = (2,10)
+        left.classification = "SSI"
+        right.classification = "SSI"
+        self.assertTrue(left.isSimilar(right)) #overlap but attri differs 
+        
+
+        left.span_in_sentence = (1,10)
+        right.span_in_sentence = (2,10)
+        left.classification = "SSI"
+        left.attributes = {'assertion':'positive', 
+                        'temporality':'current', 
+                        'anatomy':[],
+        }
+        right.classification = "SSI"
+        right.attributes = {}
+        self.assertFalse(left.isSimilar(right)) #overlap but attri differs 
+
+
+
+        left.span_in_sentence = (1,10)
+        right.span_in_sentence = (2,10)
+        left.classification = "SSI"
+        left.attributes = {'assertion':'positive', 
+                        'temporality':'current', 
+                        'anatomy':[],
+        }
+        right.classification = "SSI"
+        right.attributes = {'assertion':'positive', 
+                        'temporality':'current', 
+                        'anatomy':[],
+        }
+        self.assertTrue(left.isSimilar(right)) #overlap but attri differs 
+
+
+
+        left.span_in_sentence = (1,10)
+        right.span_in_sentence = (2,10)
+        left.classification = "SSI"
+        left.attributes = {'assertion':'positive', 
+                        'temporality':'current', 
+                        'anatomy':["surgical site"],
+        }
+        right.classification = "SSI"
+        right.attributes = {'assertion':'positive', 
+                        'temporality':'future', 
+                        'anatomy':[],
+        }
+        self.assertFalse(left.isSimilar(right)) #overlap but attri differs 
+
+        left.span_in_sentence = (1,10)
+        right.span_in_sentence = (2,10)
+        left.classification = "SSI"
+        left.attributes = {'assertion':'positive', 
+                        'temporality':'current', 
+                        'anatomy':["surgical site"],
+        }
+        right.classification = "SSI"
+        right.attributes = {'assertion':'positive', 
+                        'temporality':'current', 
+                        'anatomy':[],
+        }
+        self.assertFalse(left.isSimilar(right)) #overlap but attri differs 
+
+
+
+        left.span_in_sentence = (1,10)
+        right.span_in_sentence = (2,10)
+        left.classification = "SSI"
+        left.attributes = {'assertion':'positive', 
+                        'temporality':'current', 
+                        'anatomy':["surgical site"],
+        }
+        right.classification = "SSI"
+        right.attributes = {'assertion':'positive', 
+                        'temporality':'current', 
+                        'anatomy':["surgical site"],
+        }
+        self.assertTrue(left.isSimilar(right)) #overlap but attri differs 
+
+
+
+        # left.span_in_sentence = (1,10)
+        # right.span_in_sentence = (11, 20)
+        
+        # self.assertFalse(self._anno_overlap(left, right))
+        
+        # left.span_in_sentence = (1, 10)
+        # right.span_in_sentence = (10, 20)
+        # self.assertFalse(self._anno_overlap(left, right))
 
    
         
