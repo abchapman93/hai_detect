@@ -26,28 +26,47 @@ class ClinicalTextDocument(object):
     this is saved as an attribute `raw_text`.
     """
 
+    
     def __init__(self, text=None, rpt_id='', filepath=None):
+        
+        self.split_text_and_spans = None
+        self.sentences = [] # This will be a list of dictionairies
+                         # where each dict contains {
+                         # 'idx': int, 'text': sentence, 'word_spans': [(start, end), ...], 'span': (start, end)
+                         # }
+        self.annotations = []
+        self.sentences_with_annotations = []
+        self.element_tree = None
+        self.filepath = filepath 
+        
+        if (text or filepath or rpt_id != ''):
+            processText(text, rpt_id, filepath)
+
+    def processText(self, text=None, rpt_id='', filepath=None):
         if (not text) and filepath:
             text = self.from_filepath(filepath)
             rpt_id = os.path.splitext(os.path.basename(filepath))[0]
-
+            
         self.raw_text = text
         self.rpt_id = rpt_id
         self.original_spans = self.get_text_spans(text)
         self.preprocessed_text = self.preprocess(text)
-        self.split_text_and_spans = None
-        self.sentences = [] # This will be a list of dictionairies
-                            # where each dict contains {
-                            # 'idx': int, 'text': sentence, 'word_spans': [(start, end), ...], 'span': (start, end)
-                            # }
-        self.annotations = []
-        self.sentences_with_annotations = []
-        self.element_tree = None
+        
+        # self.split_text_and_spans = None
+        # self.sentences = [] # This will be a list of dictionairies
+        #                     # where each dict contains {
+        #                     # 'idx': int, 'text': sentence, 'word_spans': [(start, end), ...], 'span': (start, end)
+        #                     # }
+        # self.annotations = []
+        # self.sentences_with_annotations = []
+        # self.element_tree = None
 
         # Split into sentences
         # While maintaining the original text spans
         self.sentences = self.split_sentences(self.preprocessed_text, self.original_spans)
 
+
+    
 
     def from_filepath(self, filepath):
         with open(filepath) as f:
