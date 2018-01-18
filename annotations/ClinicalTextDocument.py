@@ -26,7 +26,23 @@ class ClinicalTextDocument(object):
     this is saved as an attribute `raw_text`.
     """
 
+
     def __init__(self, text=None, rpt_id='', filepath=None):
+
+        self.split_text_and_spans = None
+        self.sentences = [] # This will be a list of dictionairies
+                         # where each dict contains {
+                         # 'idx': int, 'text': sentence, 'word_spans': [(start, end), ...], 'span': (start, end)
+                         # }
+        self.annotations = []
+        self.sentences_with_annotations = []
+        self.element_tree = None
+        self.filepath = filepath
+
+        if (text or filepath or rpt_id != ''):
+            processText(text, rpt_id, filepath)
+
+    def processText(self, text=None, rpt_id='', filepath=None):
         if (not text) and filepath:
             text = self.from_filepath(filepath)
             rpt_id = os.path.splitext(os.path.basename(filepath))[0]
@@ -35,18 +51,36 @@ class ClinicalTextDocument(object):
         self.rpt_id = rpt_id
         self.original_spans = self.get_text_spans(text)
         self.preprocessed_text = self.preprocess(text)
-        self.split_text_and_spans = None
-        self.sentences = [] # This will be a list of dictionairies
-                            # where each dict contains {
-                            # 'idx': int, 'text': sentence, 'word_spans': [(start, end), ...], 'span': (start, end)
-                            # }
-        self.annotations = []
-        self.sentences_with_annotations = []
-        self.element_tree = None
+
+        # self.split_text_and_spans = None
+        # self.sentences = [] # This will be a list of dictionairies
+        #                     # where each dict contains {
+        #                     # 'idx': int, 'text': sentence, 'word_spans': [(start, end), ...], 'span': (start, end)
+        #                     # }
+        # self.annotations = []
+        # self.sentences_with_annotations = []
+        # self.element_tree = None
 
         # Split into sentences
         # While maintaining the original text spans
         self.sentences = self.split_sentences(self.preprocessed_text, self.original_spans)
+
+    def cal_diff_score(self, other):
+
+        total_len = len(self.annotations) + len(other.annotations)
+
+        match_len = 0
+        score = 0
+
+        for ann1 in self.annotations:
+            for ann2 in other.annotations:
+                if (ann1.isSimilar(ann2)):
+                    match_len += 2 #both sides
+
+        score = match_len / total_len
+
+        return score
+        pass
 
 
     def from_filepath(self, filepath):
@@ -321,6 +355,3 @@ def main():
 if __name__ == '__main__':
     main()
     exit()
-
-
-

@@ -17,10 +17,11 @@ a match.
 """
 
 import re
+import ast # abstract syntext tree for prasing the span's as tuple
 from datetime import datetime
 #from xml.etree.ElementTree import Element, SubElement
 from lxml.etree import Element, SubElement
-
+from hai_exceptions.exceptions import MalformedeHostExcelRow, MalformedSpanValue
 
 class Annotation(object):
     """
@@ -93,6 +94,43 @@ class Annotation(object):
 
     def from_ehost(self, xml_tag):
         pass
+
+    def from_ehost_xlsx(self, row):
+        ''' frst check and make sure the row is wellformed'''
+        max_col_size = 11
+        min_col_size = 5
+        col_size = len(row)
+        if ( col_size < min_col_size):
+             raise MalformedeHostExcelRow
+
+
+        self.sentence = row[2].value
+        self.annotation_type = row[4].value
+        my_tuple = None
+        # print(row[3].value)
+        try:
+            my_tuple = ast.literal_eval(row[3].value)
+        except ValueError:
+            raise MalformedSpanValue
+
+        if ((type(my_tuple) is tuple)):
+            self.span_in_sentence = my_tuple
+        else:
+            print ("Value not tuple")
+            raise MalformedSpanValue
+
+
+        if (col_size < max_col_size):
+                max_col_size = col_size
+
+        for i in range(4, max_col_size): # we only care up to the max
+            cell = row[i]
+            if (cell.value is not None):
+                if (i % 2 == 1 and i < col_size-1):
+                    self.attributes[cell.value] = row[i+1].value
+        pass
+
+
 
 
     def from_markup(self, tag_object, markup, sentence, sentence_span):
@@ -336,9 +374,45 @@ class Annotation(object):
 
 
 
+    def isOverlap(self, other, threshold=0.01):
+        if (self.span_in_sentence is None
+            or other.span_in_sentence is None
+            or self.span_in_sentence[0] >= self.span_in_sentence[1]
+            or other.span_in_sentence[0] >= other.span_in_sentence[1]):
+                return False
 
-    def compare(self, second_annotation):
+
+        tups = [self.span_in_sentence, other.span_in_sentence]
+        tups.sort() #sort so that the most left come first (make the math eaiser)
+        left_span = tups[0]
+        right_span = tups[1]
+
+        total_val = left_span[1]-left_span[0] #cal the total size
+        overlap = left_span[1]-right_span[0] # cal the area of overlap. (left is always less)
+
+        overlap_ratio = (overlap / total_val) #cal ratio of overlap. the
+
+
+        if (overlap_ratio >= threshold ):
+            return True
+
+        return False
+
+
+    def isSimilar(self, other):
+        if (isinstance(self, other.__class__)):
+            if (self.isOverlap(other)
+                and self.classification == other.classification
+                and self.attributes == other.attributes):
+
+                return True
+
+        return False
+
+
+    def compare(self, other):
         pass
+
 
 
     def to_etree(self):
