@@ -114,7 +114,7 @@ class Annotation(object):
             raise MalformedSpanValue
 
         if ((type(my_tuple) is tuple)):
-            self.span_in_sentence = my_tuple
+            self.span_in_document = my_tuple
         else:
             print ("Value not tuple")
             raise MalformedSpanValue
@@ -128,6 +128,7 @@ class Annotation(object):
             if (cell.value is not None):
                 if (i % 2 == 1 and i < col_size-1):
                     self.attributes[cell.value] = row[i+1].value
+        self.classify()
         pass
 
 
@@ -375,14 +376,24 @@ class Annotation(object):
 
 
     def isOverlap(self, other, threshold=0.01):
-        if (self.span_in_sentence is None
-            or other.span_in_sentence is None
-            or self.span_in_sentence[0] >= self.span_in_sentence[1]
-            or other.span_in_sentence[0] >= other.span_in_sentence[1]):
+        """
+        This function checks whether the two annotations have the same type
+        and the span overlaps at least `threshold` amount
+        :param other: the annotation to be compared to
+        :param threshold: the decimal amount of overlap between two annotations
+        :return:
+        """
+        if (self.span_in_document is None
+            or other.span_in_document is None
+            or self.span_in_document[0] >= self.span_in_document[1]
+            or other.span_in_document[0] >= other.span_in_document[1]):
                 return False
 
+        if (self.annotation_type != other.annotation_type): # if they don't have the same annotation type, don't compare
+            return False
 
-        tups = [self.span_in_sentence, other.span_in_sentence]
+
+        tups = [self.span_in_document, other.span_in_document]
         tups.sort() #sort so that the most left come first (make the math eaiser)
         left_span = tups[0]
         right_span = tups[1]
@@ -400,6 +411,8 @@ class Annotation(object):
 
 
     def isSimilar(self, other):
+        comparison = AnnotationComparison(self, other)
+        return comparison.is_match
         if (isinstance(self, other.__class__)):
             if (self.isOverlap(other)
                 and self.classification == other.classification
@@ -545,6 +558,7 @@ class AnnotationComparison(object):
             should be considered matches, they could both map to 0.
             and 'negated' could map to 1. This is the default setting.
         temp_map: a dictionary mapping temporality values similar to assert_map.
+            By default, current and historical are considered the same, future/hypothetical is separate.
 
     """
 
@@ -555,6 +569,7 @@ class AnnotationComparison(object):
 
         if len(assert_map) == 0:
             self.assert_map = {
+            'present': 0,
             'definite': 0,
             'probable': 0,
             'negated': 1
@@ -565,8 +580,9 @@ class AnnotationComparison(object):
         if len(temp_map) == 0:
             self.temp_map = {
             'current': 0,
-            'historical': 1,
-            'future/hypothetical':
+            'historical': 0,
+            'future/hypothtical':1, # TODO: Change this spelling
+            'future/hypothetical':1,
         }
         else:
             self.temp_map = temp_map
@@ -582,7 +598,7 @@ class AnnotationComparison(object):
         Assertion and Temporality matches are defined by assert_map and temp_map.
         :returns Boolean
         """
-        return self.compare_classification() & self.compare_assertion() & self.compare_temporality()
+        return self.compare_type() & self.compare_assertion() & self.compare_temporality()
 
 
     def compare_classification(self):
@@ -592,6 +608,14 @@ class AnnotationComparison(object):
         """
         return self.a.classification() == self.b.classification()
 
+
+    def compare_type(self):
+        """
+        Compares that the annotation type is exactly the same.
+        For example, 'Evidence of SSI'
+        :return:
+        """
+        return self.a.annotation_type == self.b.annotation_type
 
     def compare_assertion(self):
         """

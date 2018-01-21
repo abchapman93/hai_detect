@@ -2,6 +2,7 @@
 This module defines classes that are used to represent texts and annotations.
 """
 import os
+from collections import defaultdict
 
 from nltk.tokenize import WhitespaceTokenizer
 
@@ -34,7 +35,7 @@ class ClinicalTextDocument(object):
                          # where each dict contains {
                          # 'idx': int, 'text': sentence, 'word_spans': [(start, end), ...], 'span': (start, end)
                          # }
-        self.annotations = []
+        self.annotations = defaultdict(list) # annotator: [annotations, ...]
         self.sentences_with_annotations = []
         self.element_tree = None
         self.filepath = filepath
@@ -196,6 +197,8 @@ class ClinicalTextDocument(object):
         For each sentence in self.sentences, the model identifies all findings using pyConText.
         These markups are then used to create Annotations and are added to `sentence['annotations']`
         """
+        self.annotations['hai_detect'] = []
+        annotations = self.annotations['hai_detect']
         to_exclude = ['infection', 'discharge']
         for sentence_num, sentence in enumerate(self.sentences):
             #print(sentence)
@@ -219,7 +222,7 @@ class ClinicalTextDocument(object):
             for annotation in sentence_annotations:
                 if annotation.annotation_type not in to_exclude:
                     self.sentences_with_annotations.append(sentence_num)
-                    self.annotations.append(annotation)
+                    annotations.append(annotation)
 
     def prune_annotations(self, annotations):
         """
@@ -241,6 +244,54 @@ class ClinicalTextDocument(object):
         return pruned_annotations
 
 
+    def compare_annotations(self, gold='gold_standard', categories=[]):
+        """
+        This method iterates through the dictionary in self.annotations
+        where keys are annotator names and values are Annotation objects.
+        Finds annotations that overlap.
+        :param gold: the name of the gold standard annotator
+        :param categories: a list of categories to compare
+        """
+        gold_findings = defaultdict(int) # Dictionary with a count of the class of annotations
+        results = {}
+        gold_annotations = self.annotations[gold]
+        other_annotations = self.annotations['hai_detect']
+        matched_gold_annotations = []
+        matched_other_annotations = []
+        for gold_annotation in gold_annotations:
+            overlaps = False
+            annotation_type = gold_annotation.annotation_type
+            if annotation_type not in categories:
+                continue
+            if annotation_type not in results:
+                results[annotation_type] = {'count': 0, 'pred_count': 0, 'tp': 0, 'fp': 0, 'fn': 0}
+            results[annotation_type]['count'] += 1
+            for other_annotation in other_annotations:
+                overlaps = gold_annotation.isOverlap(other_annotation)
+                if overlaps: # If it overlaps, compare the two annotations
+                    #print("Found overlap:")
+                    gold_findings[annotation_type] += 1
+                    is_match = gold_annotation.isSimilar(other_annotation)
+                    #print(is_match)
+                    if is_match:
+                        results[annotation_type]['tp'] += 1
+                        matched_gold_annotations.append(gold_annotation)
+                        matched_other_annotations.append(other_annotation)
+                    else:
+                        results[annotation_type]['fn'] += 1
+            if not overlaps: # If no other annotations overlapped, then there should be a false negative
+                results[annotation_type]['fn'] += 1
+
+        # Now go through all of the system annotations that didn't have a match to compute false positives
+        for a in other_annotations:
+        #for a in unmatched:
+            annotation_type = a.annotation_type
+            if annotation_type not in results:
+                results[annotation_type] = {'count': 0, 'pred_count': 0, 'tp': 0, 'fp': 0, 'fn': 0}
+            results[annotation_type]['pred_count'] += 1
+            if a not in matched_other_annotations:
+                results[annotation_type]['fp'] += 1
+        return results
 
 
 
@@ -316,10 +367,13 @@ class ClinicalTextDocument(object):
     def __str__(self):
         string = ''
         string += 'Report: {0}\n'.format(self.rpt_id)
+        annotations = []
+        for annotator, annotations in self.annotations.items():
+            annotations.extend(annotations)
         for sentence_num, sentence in enumerate(self.sentences):
             string += '{text} '.format(**sentence)
             if sentence_num in self.sentences_with_annotations:
-                for annotation in [a for a in self.annotations if a.sentence_num == sentence_num]:
+                for annotation in [a for a in annotations if a.sentence_num == sentence_num]:
                     string +=  annotation.get_short_string() + '\n'
         return string
 
