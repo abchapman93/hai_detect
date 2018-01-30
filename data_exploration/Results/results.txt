@@ -1,8 +1,0 @@
-Total number of patients in table `epic_notes`: 2089
-Total number of notes in table `epic_notes`: 52429
-Total number of notes in note_info: 35318
-Total number of cases with notes within 30 days of an operation: 1374
-Total number of notes within 30 days: 8704
-Total number of cases with notes within 30 days of an operation with HAI: 78
-Total number of notes within 30 days with HAI: 1070
-Percentage of cases in cohort with HAI: 5.676855895196507%
