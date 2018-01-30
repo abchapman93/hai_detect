@@ -66,6 +66,7 @@ class Annotation(object):
     def __init__(self):
         self.sentence = None
         self.datetime = datetime.now().strftime('%m%d%Y %H:%M:%S') # TODO: Change this to match eHOST
+        self.rpt_id = ''
         self.id = ''  # TODO: Change this
         self.text = None
         self.sentence_num = None
@@ -91,6 +92,9 @@ class Annotation(object):
     def classification(self):
         return self._classification
 
+    def set_classification(self, value):
+        self._classification = ""
+
 
     def from_ehost(self, xml_tag):
         pass
@@ -103,8 +107,12 @@ class Annotation(object):
         if ( col_size < min_col_size):
              raise MalformedeHostExcelRow
 
+        self.rpt_id = row[0].value
+
 
         self.sentence = row[2].value
+        self.text = row[2].value
+        self.annotator = "Gold Standard" # TODO: find a better way to set annotator
         self.annotation_type = row[4].value
         my_tuple = None
         # print(row[3].value)
@@ -134,7 +142,7 @@ class Annotation(object):
 
 
 
-    def from_markup(self, tag_object, markup, sentence, sentence_span):
+    def from_markup(self, tag_object, markup, sentence, sentence_span, rpt_id):
         """
         Takes a markup and a tag_object, a target node from that markup.
         Sentence is the raw text.
@@ -148,6 +156,7 @@ class Annotation(object):
 
         self.annotator = 'hai_detect'
         self.id = str(tag_object.getTagID())
+        self.rpt_id = rpt_id
 
         # Get category of target
         self.markup_category = tag_object.getCategory()[0]
@@ -412,7 +421,7 @@ class Annotation(object):
 
     def isSimilar(self, other):
         comparison = AnnotationComparison(self, other)
-        return comparison.is_match
+        return comparison
         if (isinstance(self, other.__class__)):
             if (self.isOverlap(other)
                 and self.classification == other.classification
@@ -537,11 +546,11 @@ class Annotation(object):
         return string
 
     def __str__(self):
-        string =  'Annotation by: {a}\nSentence: {s}\nText: {t}\nSpan: {sp}\n'.format(
-             a=self.annotator, s=self.sentence, sp=self.span_in_document, t=self.text)
+        string =  'Annotation by: {a}\nReport ID: {rpt_id}\n Text: {t}\nSpan: {sp}\n'.format(
+             a=self.annotator, rpt_id=self.rpt_id, s=self.sentence, sp=self.span_in_document, t=self.text)
         string += 'Attributes:\n    Assertion: {assertion}\n    Temporality: {temporality}\n'.format(**self.attributes)
         if self.annotation_type == 'Evidence of SSI':
-            string += '    Infection type: {i}\n'.format(i=self.attributes['ssi_class'])
+            string += '    Infection type: {i}\n'.format(i=self.attributes['ssi_class'] if 'ssi_class' in self.attributes else '')
         string += 'Classification: {c}'.format(c=self.classification)
 
         return string
@@ -562,34 +571,61 @@ class AnnotationComparison(object):
 
     """
 
-    def __init__(self, a, b, rpt_id='classification', assert_map={}, temp_map={}):
+    def __init__(self, a=None, b=None, rpt_id='', assert_map={}, temp_map={}):
         self.a = a
         self.b = b
-        self.rpt_id = rpt_id
 
-        if len(assert_map) == 0:
-            self.assert_map = {
-            'present': 0,
-            'definite': 0,
-            'probable': 0,
-            'negated': 1
-        }
+        # If either annotation is missing, create a NULL annotation
+        if a == None:
+            self.rpt_id = b.rpt_id
+            self.a = self.from_null(b.rpt_id)
+            self.is_match = False
+        elif b == None:
+            self.rpt_id = a.rpt_id
+            self.b = self.from_null(a.rpt_id)
+            self.is_match = False
         else:
-            self.assert_map = assert_map
+            assert a.rpt_id == b.rpt_id
+            self.rpt_id = a.rpt_id
 
-        if len(temp_map) == 0:
-            self.temp_map = {
-            'current': 0,
-            'historical': 0,
-            'future/hypothtical':1, # TODO: Change this spelling
-            'future/hypothetical':1,
-        }
-        else:
-            self.temp_map = temp_map
+            if len(assert_map) == 0:
+                self.assert_map = {
+                'present': 0,
+                'definite': 0,
+                'probable': 0,
+                'negated': 1
+            }
+            else:
+                self.assert_map = assert_map
 
-    @property
-    def is_match(self):
-        return self.compare_annotations()
+            if len(temp_map) == 0:
+                self.temp_map = {
+                'current': 0,
+                'historical': 0,
+                'future/hypothtical':1, # TODO: Change this spelling
+                'future/hypothetical':1,
+            }
+            else:
+                self.temp_map = temp_map
+
+            self.is_match = self.compare_annotations()
+
+
+    def from_null(self, rpt_id):
+        """
+        If an annotation doesn't have a match,
+        this method creates a "null" annotation
+        that represents an empty annotation
+        """
+        anno = Annotation()
+        anno.rpt_id = rpt_id
+        anno.id = "--"
+        anno.annotator = "--"
+        anno.set_classification("--")
+        anno.span_in_document = "--"
+        anno.text = "--"
+        anno.attributes = {}
+        return anno
 
 
     def compare_annotations(self):
@@ -636,6 +672,26 @@ class AnnotationComparison(object):
         return self.temp_map[self.a.attributes['temporality']] == \
                self.temp_map[self.b.attributes['temporality']]
 
+
+    def __str__(self):
+        string = ""
+        string += "Document ID: {}\n".format(self.rpt_id)
+        string += "Is Match: {}\n".format(self.is_match)
+        string += "Annotation 1: {}\n".format(self.a.id)
+        string += "Annotator ID: {}\n".format(self.a.annotator)
+        string += "Span: {}\n".format(self.a.span_in_document)
+        string += "Classification: {}\n".format(self.a.classification)
+        string += "Text: {}\n".format(self.a.text)
+        string += "Attributes: {}\n\n".format(self.a.attributes)
+
+        string += "Annotation 2: {}\n".format(self.b.id)
+        string += "Annotator ID: {}\n".format(self.b.annotator)
+        string += "Classification: {}\n".format(self.b.classification)
+        string += "Span: {}\n".format(self.b.span_in_document)
+        string += "Text: {}\n".format(self.b.text)
+        string += "Attributes: {}\n\n".format(self.b.attributes)
+
+        return string
 
 
 if __name__ == '__main__':

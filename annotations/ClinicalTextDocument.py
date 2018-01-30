@@ -13,7 +13,7 @@ from lxml import etree
 from lxml.etree import Element, SubElement
 
 from utils import helpers
-from annotations.Annotation import Annotation
+from annotations.Annotation import Annotation, AnnotationComparison
 from models.mention_level_models import MentionLevelModel
 
 
@@ -36,12 +36,13 @@ class ClinicalTextDocument(object):
                          # 'idx': int, 'text': sentence, 'word_spans': [(start, end), ...], 'span': (start, end)
                          # }
         self.annotations = defaultdict(list) # annotator: [annotations, ...]
+        self.rpt_id = os.path.splitext(rpt_id)
         self.sentences_with_annotations = []
         self.element_tree = None
         self.filepath = filepath
 
         if (text or filepath or rpt_id != ''):
-            processText(text, rpt_id, filepath)
+            self.processText(text, rpt_id, filepath)
 
     def processText(self, text=None, rpt_id='', filepath=None):
         if (not text) and filepath:
@@ -212,7 +213,7 @@ class ClinicalTextDocument(object):
             sentence_annotations = []
             for target in targets:
                 annotation = Annotation()
-                annotation.from_markup(target, markup, sentence['text'], sentence['span'])
+                annotation.from_markup(target, markup, sentence['text'], sentence['span'], rpt_id=self.rpt_id)
                 # If classification is None, this markup should be disregarded
                 if not annotation.classification:
                     continue
@@ -240,6 +241,13 @@ class ClinicalTextDocument(object):
             # If anything else needs to be added, do it here
             first_annotation = annotations_of_classification[0]
             pruned_annotations.append(first_annotation)
+        #if self.rpt_id == "no_11049_379997247_12-02-2013_PHYSICIAN_Progress_Notes" and 'hai_detect' in self.annotations:
+            #print("Found target")
+            #print(self.annotations)
+            #print(pruned_annotations)
+            #for i, a in enumerate(pruned_annotations):
+            #    print("Annotation " + str(i))
+            #    print(a)
 
         return pruned_annotations
 
@@ -254,12 +262,16 @@ class ClinicalTextDocument(object):
         """
         gold_findings = defaultdict(int) # Dictionary with a count of the class of annotations
         results = {}
+
+        # Create a list that will contain all comparison
+        results['comparisons'] = []
+
         gold_annotations = self.annotations[gold]
         other_annotations = self.annotations['hai_detect']
         matched_gold_annotations = []
         matched_other_annotations = []
         for gold_annotation in gold_annotations:
-            overlaps = False
+            had_overlap = False # This will keep track of whether a gold annotation had at least one match
             annotation_type = gold_annotation.annotation_type
             if annotation_type not in categories:
                 continue
@@ -269,28 +281,56 @@ class ClinicalTextDocument(object):
             for other_annotation in other_annotations:
                 overlaps = gold_annotation.isOverlap(other_annotation)
                 if overlaps: # If it overlaps, compare the two annotations
-                    #print("Found overlap:")
+                    had_overlap = True
+                    # Plus one more count
                     gold_findings[annotation_type] += 1
-                    is_match = gold_annotation.isSimilar(other_annotation)
-                    #print(is_match)
+                    results[annotation_type]['pred_count'] += 1
+                    # Compare the two annotations, save the comparison
+                    comparison = gold_annotation.isSimilar(other_annotation)
+                    results['comparisons'].append(comparison)
+                    is_match = comparison.is_match
                     if is_match:
                         results[annotation_type]['tp'] += 1
+                        # If one of these annotations is already in the matched list,
+                        # that means it's matched more than once
+                        # and for now I am going to count it twice
+                        # TODO: Validate this
+                        if other_annotation in matched_other_annotations:
+                            results[annotation_type]['count'] += 1
                         matched_gold_annotations.append(gold_annotation)
                         matched_other_annotations.append(other_annotation)
                     else:
                         results[annotation_type]['fn'] += 1
-            if not overlaps: # If no other annotations overlapped, then there should be a false negative
+            if not had_overlap: # If no other annotations overlapped, then there should be a false negative
                 results[annotation_type]['fn'] += 1
+                empty_comparison = AnnotationComparison(a=gold_annotation, b=None)
+                results['comparisons'].append(empty_comparison)
 
         # Now go through all of the system annotations that didn't have a match to compute false positives
-        for a in other_annotations:
+        for anno in other_annotations:
+            annotation_type = anno.annotation_type
         #for a in unmatched:
-            annotation_type = a.annotation_type
             if annotation_type not in results:
                 results[annotation_type] = {'count': 0, 'pred_count': 0, 'tp': 0, 'fp': 0, 'fn': 0}
-            results[annotation_type]['pred_count'] += 1
-            if a not in matched_other_annotations:
+            if anno not in matched_other_annotations:
+                results[annotation_type]['pred_count'] += 1
                 results[annotation_type]['fp'] += 1
+                empty_comparison = AnnotationComparison(a=None, b=anno)
+                results['comparisons'].append(empty_comparison)
+                annotation_type = anno.annotation_type
+
+        for annotation_type in categories:
+            if annotation_type in results:
+                try:
+                    #assert (results[annotation_type]['tp'] + results[annotation_type]['fn'] == results[annotation_type]['count'])
+                    assert ((results[annotation_type]['pred_count'] >= results[annotation_type]['tp']) and
+                        (results[annotation_type]['pred_count'] >= results[annotation_type]['fp']))
+                    assert ((results[annotation_type]['count'] >= results[annotation_type]['tp']) and
+                            results[annotation_type]['count'] >= results[annotation_type]['fn'])
+                except AssertionError as e:
+                    with open("failed_comparison.txt", "w") as f:
+                        f.write("\n\n\n".join([str(c) for c in results["comparisons"]]))
+                    raise e
         return results
 
 
@@ -309,7 +349,10 @@ class ClinicalTextDocument(object):
         root = Element('annotations')
         root.set('textSource', self.rpt_id + '.txt')
         # TODO:
-        for annotation in self.annotations:
+        annotations = []
+        for annotator in self.annotations:
+            annotations.extend(self.annotations[annotator])
+        for annotation in annotations:
             elements_to_append = annotation.to_etree()
             for element in elements_to_append:
                 root.append(element)
