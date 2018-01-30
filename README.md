@@ -8,9 +8,7 @@ hai_detect is an implementation of pyConText. The purpose of this implementation
 This project is an extension of fcFinder, which focused only on Organ/Space SSIs.
 This package will be developed and maintained by:
 * Alec Chapman
-* Siru Liu
 * Jacob Wan
-* Aaron Jackson
 * Brian Bucher, MD (senior author)
 
 ## Introduction
@@ -29,25 +27,21 @@ In addition to *__init__.py* and *README.md*, the root directory will contain th
 * *main.py* This is a script that will accept the directory containing data as an argument and run the hai_detect algorithm on the data found in the directory.
 * *AggregateModel.py* This module defines a class that aggregates the three models found in *Models* and finds all mentions of HAIs in a report.
 
-### data_wrangling
-This directory will contain generic scripts that show how to wrangle data for the project, such as connecting the Enterprise Data Warehouse (EDW), querying a *sqlite* database, or reading in text files.
+### utils
+This directory will contain scripts that will read offer utilities for data wrangling/exploration, such as identifying number of patients with HAIs, average number of notes per patient, etc.
 
-### data_exploration
-This directory will contain scripts that will read through the data and identify useful information about it, such as number of patients with HAIs, average number of notes per patient, etc.
 
 ### models
-This directory will contain two modules that define the classes for classifying text. *MentionLevelModels.py* contains four classes: one generic mention-level class, `MentionLevelModel`, as well as three classes used for identifying specific types of HAIs that inherit from `MentionLevelModel`.
+This directory will contain two modules that define the classes for classifying text. *MentionLevelModels.py* contains the class `MentionLevelModel`, which takes implements the pyConText algorithm using targets and modifiers.
 
 The second module will define a classes for report-level classification.
 * *mention_level_models.py*
 * *document_level_models.py*
 
 ### annotations
-This directory will contain code for reading and saving findings as structured data. A useful package for this is [eHOSTESS](http://ehostess.readthedocs.io/en/latest/PyConTextInterface.html), a pyConText interface developed by Max Taggart that saves findings from pyConText in a DBMongo instance and allows interaction with the annotation tool eHOST.
+This directory contains the classes that process text documents and annotations. It contains two modules, `Annotation.py`, which defines the classes that hold the NLP findings, and `ClinicalTextDocument`, which takes a text report, links to annotations, and compares the annotations.
 
 ### lexicon
-This directory will contain the *.tsv.* files that pyConText uses to instantiate targets and modifiers. There will be on generic file for modifiers and individual files for each class of HAI.
+This directory will contain the *.tsv.* files that pyConText uses to instantiate targets and modifiers. There will be on generic file for modifiers and one for targets.
+* *targets.tsv*
 * *modifiers.tsv*
-* *ssi.tsv*
-* *uti.tsv*
-* *pneumonia.tsv*
