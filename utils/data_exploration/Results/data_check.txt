@@ -1,0 +1,14 @@
+Location of notes: /Users/alec/Box Sync/epic_notes/patient_cohort
+Total number of notes: 7913
+train
+# cases: 758
+# notes: 4493
+% notes: 0.567799823075951
+val
+# cases: 247
+# notes: 1831
+% notes: 0.23139138127132566
+test
+# cases: 254
+# notes: 1589
+% notes: 0.20080879565272336
