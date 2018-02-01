@@ -55,7 +55,7 @@ class ClinicalTextDocument(object):
         self.preprocessed_text = self.preprocess(text)
 
         # self.split_text_and_spans = None
-        # self.sentences = [] # This will be a list of dictionairies
+        # self.sentences = [] # This will be a list of dictionaries
         #                     # where each dict contains {
         #                     # 'idx': int, 'text': sentence, 'word_spans': [(start, end), ...], 'span': (start, end)
         #                     # }
@@ -260,11 +260,9 @@ class ClinicalTextDocument(object):
         :param gold: the name of the gold standard annotator
         :param categories: a list of categories to compare
         """
-        gold_findings = defaultdict(int) # Dictionary with a count of the class of annotations
-        results = {}
+        comparisons = []
 
         # Create a list that will contain all comparison
-        results['comparisons'] = []
 
         gold_annotations = self.annotations[gold]
         other_annotations = self.annotations['hai_detect']
@@ -275,63 +273,27 @@ class ClinicalTextDocument(object):
             annotation_type = gold_annotation.annotation_type
             if annotation_type not in categories:
                 continue
-            if annotation_type not in results:
-                results[annotation_type] = {'count': 0, 'pred_count': 0, 'tp': 0, 'fp': 0, 'fn': 0}
-            results[annotation_type]['count'] += 1
             for other_annotation in other_annotations:
                 overlaps = gold_annotation.isOverlap(other_annotation)
+                # AnnotationComparison 1: two annotations overlap
                 if overlaps: # If it overlaps, compare the two annotations
                     had_overlap = True
-                    # Plus one more count
-                    gold_findings[annotation_type] += 1
-                    results[annotation_type]['pred_count'] += 1
                     # Compare the two annotations, save the comparison
-                    comparison = gold_annotation.isSimilar(other_annotation)
-                    results['comparisons'].append(comparison)
-                    is_match = comparison.is_match
-                    if is_match:
-                        results[annotation_type]['tp'] += 1
-                        # If one of these annotations is already in the matched list,
-                        # that means it's matched more than once
-                        # and for now I am going to count it twice
-                        # TODO: Validate this
-                        if other_annotation in matched_other_annotations:
-                            results[annotation_type]['count'] += 1
-                        matched_gold_annotations.append(gold_annotation)
-                        matched_other_annotations.append(other_annotation)
-                    else:
-                        results[annotation_type]['fn'] += 1
+                    matched_other_annotations.append(other_annotation)
+                    comparison = gold_annotation.compare(other_annotation)
+                    comparisons.append(comparison)
+            # AnnotationComparison 2: A gold standard didn't overlap with any annotations
             if not had_overlap: # If no other annotations overlapped, then there should be a false negative
-                results[annotation_type]['fn'] += 1
                 empty_comparison = AnnotationComparison(a=gold_annotation, b=None)
-                results['comparisons'].append(empty_comparison)
+                comparisons.append(empty_comparison)
 
-        # Now go through all of the system annotations that didn't have a match to compute false positives
-        for anno in other_annotations:
-            annotation_type = anno.annotation_type
-        #for a in unmatched:
-            if annotation_type not in results:
-                results[annotation_type] = {'count': 0, 'pred_count': 0, 'tp': 0, 'fp': 0, 'fn': 0}
-            if anno not in matched_other_annotations:
-                results[annotation_type]['pred_count'] += 1
-                results[annotation_type]['fp'] += 1
-                empty_comparison = AnnotationComparison(a=None, b=anno)
-                results['comparisons'].append(empty_comparison)
-                annotation_type = anno.annotation_type
+        # AnnotationComparison 3: A gold standard didn't overlap with any annotations
+        # Now go through all of the system annotations that didn't have a match to compute to create empty comparisons
+        for anno in set(other_annotations).difference(set(matched_other_annotations)):
+            empty_comparison = AnnotationComparison(a=None, b=anno)
+            comparisons.append(empty_comparison)
 
-        for annotation_type in categories:
-            if annotation_type in results:
-                try:
-                    #assert (results[annotation_type]['tp'] + results[annotation_type]['fn'] == results[annotation_type]['count'])
-                    assert ((results[annotation_type]['pred_count'] >= results[annotation_type]['tp']) and
-                        (results[annotation_type]['pred_count'] >= results[annotation_type]['fp']))
-                    assert ((results[annotation_type]['count'] >= results[annotation_type]['tp']) and
-                            results[annotation_type]['count'] >= results[annotation_type]['fn'])
-                except AssertionError as e:
-                    with open("failed_comparison.txt", "w") as f:
-                        f.write("\n\n\n".join([str(c) for c in results["comparisons"]]))
-                    raise e
-        return results
+        return comparisons
 
 
 
@@ -339,6 +301,7 @@ class ClinicalTextDocument(object):
         """
         Returns a list of annotations.
         """
+        # TODO: change to get the dictionary values
         return self.annotations
 
 

@@ -392,14 +392,15 @@ class Annotation(object):
         :param threshold: the decimal amount of overlap between two annotations
         :return:
         """
+        if (self.annotation_type != other.annotation_type): # if they don't have the same annotation type, don't compare
+            return False
+
         if (self.span_in_document is None
             or other.span_in_document is None
             or self.span_in_document[0] >= self.span_in_document[1]
             or other.span_in_document[0] >= other.span_in_document[1]):
                 return False
 
-        if (self.annotation_type != other.annotation_type): # if they don't have the same annotation type, don't compare
-            return False
 
 
         tups = [self.span_in_document, other.span_in_document]
@@ -419,7 +420,7 @@ class Annotation(object):
         return False
 
 
-    def isSimilar(self, other):
+    def compare(self, other):
         comparison = AnnotationComparison(self, other)
         return comparison
         if (isinstance(self, other.__class__)):
@@ -430,11 +431,6 @@ class Annotation(object):
                 return True
 
         return False
-
-
-    def compare(self, other):
-        pass
-
 
 
     def to_etree(self):
@@ -574,19 +570,30 @@ class AnnotationComparison(object):
     def __init__(self, a=None, b=None, rpt_id='', assert_map={}, temp_map={}):
         self.a = a
         self.b = b
+        self.has_a = True
+        self.has_b = True
+        self.annotation_type= ''
 
         # If either annotation is missing, create a NULL annotation
         if a == None:
             self.rpt_id = b.rpt_id
             self.a = self.from_null(b.rpt_id)
+            self.has_a = False
+            self.annotation_type = b.annotation_type
             self.is_match = False
         elif b == None:
             self.rpt_id = a.rpt_id
             self.b = self.from_null(a.rpt_id)
+            self.has_b = False
+            self.annotation_type = a.annotation_type
             self.is_match = False
         else:
             assert a.rpt_id == b.rpt_id
+            assert a.annotation_type == b.annotation_type
+            self.has_b = True
+            self.has_a = True
             self.rpt_id = a.rpt_id
+            self.annotation_type = a.annotation_type
 
             if len(assert_map) == 0:
                 self.assert_map = {
