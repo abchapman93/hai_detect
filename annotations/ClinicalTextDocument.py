@@ -222,7 +222,7 @@ class ClinicalTextDocument(object):
             
             for target in targets:
                 annotation = Annotation()
-                annotation.from_markup(target, markup, sentence_text, self.sentences[root_num]['span'])
+                annotation.from_markup(target, markup, sentence_text, self.sentences[root_num]['span'],rpt_id=self.rpt_id)
                 # If classification is None, this markup should be disregarded
                 if not annotation.classification:
                     continue
@@ -244,6 +244,9 @@ class ClinicalTextDocument(object):
         to_exclude = ['infection', 'discharge']
         for sentence_num, sentence in enumerate(self.sentences):
 
+            sentence_annotations = self.annotate_sentence(model, sentence_num, sentence['text'], sentence_num, 0)
+            
+
             # #print(sentence)
             # #print(sentence['text'])
             # #print(type(sentence['text']))
@@ -255,35 +258,13 @@ class ClinicalTextDocument(object):
             # sentence_annotations = []
             # for target in targets:
             #     annotation = Annotation()
-            #     annotation.from_markup(target, markup, sentence['text'], sentence['span'])
+            #     annotation.from_markup(target, markup, sentence['text'], sentence['span'], rpt_id=self.rpt_id)
             #     # If classification is None, this markup should be disregarded
             #     if not annotation.classification:
             #         continue
             #     annotation.sentence_num = sentence_num
             #     sentence_annotations.append(annotation)
             # sentence_annotations = self.prune_annotations(sentence_annotations)
-            
-            sentence_annotations = self.annotate_sentence(model, sentence_num, sentence['text'], sentence_num, 0)
-            
-
-            #print(sentence)
-            #print(sentence['text'])
-            #print(type(sentence['text']))
-            markup = model.markup_sentence(sentence['text'])
-            targets = markup.getMarkedTargets()
-
-            # Create annotations out of targets
-            # TODO: Prune overlapping annotations
-            sentence_annotations = []
-            for target in targets:
-                annotation = Annotation()
-                annotation.from_markup(target, markup, sentence['text'], sentence['span'], rpt_id=self.rpt_id)
-                # If classification is None, this markup should be disregarded
-                if not annotation.classification:
-                    continue
-                annotation.sentence_num = sentence_num
-                sentence_annotations.append(annotation)
-            sentence_annotations = self.prune_annotations(sentence_annotations)
 
             for annotation in sentence_annotations:
                 if annotation.annotation_type not in to_exclude:

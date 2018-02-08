@@ -121,6 +121,7 @@ class test_ClinicalTextDocument(unittest.TestCase):
  
     
     def test_annotate(self):
+        print ('')
         targets = os.path.abspath('./lexicon/targets.tsv')
         modifiers = os.path.abspath('./lexicon/modifiers.tsv')
         model = MentionLevelModel(targets, modifiers)
@@ -164,7 +165,7 @@ class test_ClinicalTextDocument(unittest.TestCase):
         doc.annotate(model)
         self.assertTrue(doc.annotations['hai_detect'][0].classification, 'Positive Evidence of SSI')
         
-        print ('---------ssi multi joined')
+        print ('---------ssi multi joined--------')
         doc = ClinicalTextDocument(ssi_multi_joined)
         doc.annotate(model)
         self.assertTrue(doc.annotations['hai_detect'][0].classification, 'Positive Evidence of SSI')
