@@ -4,8 +4,7 @@ import os.path
 from openpyxl import load_workbook
 from hai_exceptions.exceptions import MalformedeHostExcelRow, MalformedSpanValue
 # from compare_annotation import import_from_xlsx
-import numpy as np
-from IAA import cohen, fleiss
+
 
 class test_Main(unittest.TestCase):
     
