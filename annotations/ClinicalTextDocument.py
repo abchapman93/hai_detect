@@ -67,22 +67,24 @@ class ClinicalTextDocument(object):
         # While maintaining the original text spans
         self.sentences = self.split_sentences(self.preprocessed_text, self.original_spans)
 
-    def cal_diff_score(self, other):
+    # def cal_diff_score(self, other):
 
-        total_len = len(self.annotations) + len(other.annotations)
+    #     total_len = len(self.annotations) + len(other.annotations)
 
-        match_len = 0
-        score = 0
+    #     match_len = 0
+    #     score = 0
 
-        for ann1 in self.annotations:
-            for ann2 in other.annotations:
-                if (ann1.isSimilar(ann2)):
-                    match_len += 2 #both sides
+    #     for ann1 in self.annotations:
+    #         for ann2 in other.annotations:
+    #             if (ann1.isSimilar(ann2)):
+    #                 match_len += 2 #both sides
 
-        score = match_len / total_len
+    #     totatotal_len-match_len
+        
+    #     score = match_len / total_len
 
-        return score
-        pass
+    #     return score
+    #     pass
 
 
     def from_filepath(self, filepath):
@@ -192,6 +194,45 @@ class ClinicalTextDocument(object):
 
         return sentences
 
+    
+    def annotate_sentence(self, model, root_num, sentence_text, cur_idx, depth):
+        """ 
+            Actual annotation of the sentence. Refactor out from annotate function for recursion
+            Given model, the root (to preserve the parent span)
+            Sentence_text = Original or appended text from previous sentence
+            cur_idx = the most recent added sentence index (make sure not run over)
+            dept = to maintain max span of the lookbehind
+        """
+        
+        maxlookbehind = 2
+        sentence_annotations = []
+        markup = model.markup_sentence(sentence_text)
+        targets = markup.getMarkedTargets()
+      
+        if (len(targets) == 0 #no targets then there will be no modifiers applied. So must have target
+             and depth < maxlookbehind
+             and cur_idx > 0):
+        
+             newStr= self.sentences[cur_idx-1]['text']+(sentence_text)
+             #recursion to get the annotations for the sentence
+             sentence_annotations = self.annotate_sentence(model, root_num,  newStr, cur_idx-1,depth+1)
+        else:         
+            #  Create annotations out of targets
+            # TODO: Prune overlapping annotations
+            
+            for target in targets:
+                annotation = Annotation()
+                annotation.from_markup(target, markup, sentence_text, self.sentences[root_num]['span'],rpt_id=self.rpt_id)
+                # If classification is None, this markup should be disregarded
+                if not annotation.classification:
+                    continue
+                annotation.sentence_num = root_num
+                sentence_annotations.append(annotation)
+                sentence_annotations = self.prune_annotations(sentence_annotations)
+           
+       
+        return sentence_annotations
+        
     def annotate(self, model):
         """
         This methods takes a MentionLevelModel that identifies targets and modifiers.
@@ -202,24 +243,29 @@ class ClinicalTextDocument(object):
         annotations = self.annotations['hai_detect']
         to_exclude = ['infection', 'discharge']
         for sentence_num, sentence in enumerate(self.sentences):
-            #print(sentence)
-            #print(sentence['text'])
-            #print(type(sentence['text']))
-            markup = model.markup_sentence(sentence['text'])
-            targets = markup.getMarkedTargets()
 
-            # Create annotations out of targets
-            # TODO: Prune overlapping annotations
-            sentence_annotations = []
-            for target in targets:
-                annotation = Annotation()
-                annotation.from_markup(target, markup, sentence['text'], sentence['span'], rpt_id=self.rpt_id)
-                # If classification is None, this markup should be disregarded
-                if not annotation.classification:
-                    continue
-                annotation.sentence_num = sentence_num
-                sentence_annotations.append(annotation)
-            sentence_annotations = self.prune_annotations(sentence_annotations)
+            sentence_annotations = self.annotate_sentence(model, sentence_num, sentence['text'], sentence_num, 0)
+            
+
+            # #print(sentence)
+            # #print(sentence['text'])
+            # #print(type(sentence['text']))
+            # markup = model.markup_sentence(sentence['text'])
+            # targets = markup.getMarkedTargets()
+
+            # # Create annotations out of targets
+            # # TODO: Prune overlapping annotations
+            # sentence_annotations = []
+            # for target in targets:
+            #     annotation = Annotation()
+            #     annotation.from_markup(target, markup, sentence['text'], sentence['span'], rpt_id=self.rpt_id)
+            #     # If classification is None, this markup should be disregarded
+            #     if not annotation.classification:
+            #         continue
+            #     annotation.sentence_num = sentence_num
+            #     sentence_annotations.append(annotation)
+            # sentence_annotations = self.prune_annotations(sentence_annotations)
+
             for annotation in sentence_annotations:
                 if annotation.annotation_type not in to_exclude:
                     self.sentences_with_annotations.append(sentence_num)
