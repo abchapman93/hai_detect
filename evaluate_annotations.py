@@ -32,6 +32,8 @@ def import_from_xlsx(corpus_dir, file_name):
         row = list(ws)[i]
         full_file_name = row[1].value #second column
         full_file_path = os.path.join(corpus_dir, full_file_name)
+        if not os.path.exists(full_file_path):
+            continue
 
         anno = Annotation()
         anno.from_ehost_xlsx(row)
@@ -77,19 +79,17 @@ def compute_metrics(comparisons, categories):
         # If they're not, figure out what kind of error
         # If there's a gold but not system annotation -> false negative
         elif c.has_a and not c.has_b:
-            print("No B!")
             metrics[anno_type]['fn'] += 1
         # If there's a system annotation but no gold -> false positive
         elif not c.has_a and c.has_b:
-            print("No A!")
             metrics[anno_type]['fp'] += 1
         # If there's one of each, but it's not a match -> false negative
         elif c.has_a and c.has_b:
             metrics[anno_type]['fn'] += 1
-        if not c.is_match:
-            print(c)
-            print(c.has_a)
-            print(c.has_b)
+       # if not c.is_match:
+       #     print(c)
+       #     print(c.has_a)
+       #     print(c.has_b)
     # Now compute precision, recall, F1
     for cat in categories:
         try:
@@ -139,10 +139,16 @@ def main():
         document.annotate(model)
         comparisons.extend(document.compare_annotations(categories=categories))
     metrics = compute_metrics(comparisons, categories)
-    print()
+    with open('test.txt', 'w') as f:
+        f.write('\n\n'.join([str(c) for c in comparisons]))
+    print(metrics); exit()
     for cat in categories:
         print(cat)
-        print("Recall: {recall}\nPrecision: {precision}\nF1: {f1}\n\n\n".format(**metrics[cat]))
+        out = "Recall: {recall}\nPrecision: {precision}\nF1: {f1}\nTrue Count: {true_count}\n Predicted Count: {pred_count}\n".format(**metrics[cat])
+        out += "True Positives: {tp}\nFalse Positives: {fp}\nFalse Negatives: {fn}\n\n\n\n".format(**metrics[cat])
+        with open('hai_results.txt', 'w') as f:
+            f.write(out)
+        print(out)
 
     matched = [c for c in comparisons if c.is_match]
     unmatched = [c for c in comparisons if not c.is_match]
@@ -157,55 +163,6 @@ def main():
     print("Saved results")
 
     exit()
-    # Now iterate through results and compute final results
-    matched = []
-    unmatched = []
-    aggr_results = {}
-    for r in results:
-        #print(r)
-        # Iterate through the annotation classes and get counts
-        for annotation_type in categories:
-            if annotation_type not in r:
-                continue
-            if annotation_type not in aggr_results:
-                aggr_results[annotation_type] = r[annotation_type]
-            else:
-                for metr, num in r[annotation_type].items():
-                    aggr_results[annotation_type][metr] += num
-
-        # Save all matched and unmatched comparisons
-        for c in r['comparisons']:
-            if c.is_match:
-                matched.append(c)
-            else:
-                unmatched.append(c)
-
-    #print(aggr_results.keys())
-    #print(aggr_results.items())
-
-
-    metrics = {}
-    for annotation_type, nums in aggr_results.items():
-        #print(annotation_type, nums)
-        metrics[annotation_type] = {'precision': 0, 'recall': 0}
-
-        try:
-            metrics[annotation_type]['precision'] = nums['tp']/nums['pred_count']
-        except ZeroDivisionError as e:
-            metrics[annotation_type]['precision'] = 0
-            #raise e
-        try:
-            metrics[annotation_type]['recall'] = nums['tp']/nums['count']
-        except ZeroDivisionError:
-            metrics[annotation_type]['recall'] = 0
-        metrics[annotation_type]['true_count'] = nums['count']
-        metrics[annotation_type]['pred_count'] = nums['pred_count']
-
-
-    for class_name in metrics.keys():
-        print("{}: {}".format(class_name, metrics[class_name]))
-
-
 
 
 

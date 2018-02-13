@@ -282,8 +282,12 @@ class ClinicalTextDocument(object):
                     matched_other_annotations.append(other_annotation)
                     comparison = gold_annotation.compare(other_annotation)
                     comparisons.append(comparison)
+                    if self.rpt_id == "no_110491_379997247_12-02-2013_PHYSICIAN_Progress_Notes":
+                        print("Pay Attention!")
+                        print(comparison)
             # AnnotationComparison 2: A gold standard didn't overlap with any annotations
             if not had_overlap: # If no other annotations overlapped, then there should be a false negative
+
                 empty_comparison = AnnotationComparison(a=gold_annotation, b=None)
                 comparisons.append(empty_comparison)
 

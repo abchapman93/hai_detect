@@ -423,12 +423,6 @@ class Annotation(object):
     def compare(self, other):
         comparison = AnnotationComparison(self, other)
         return comparison
-        if (isinstance(self, other.__class__)):
-            if (self.isOverlap(other)
-                and self.classification == other.classification
-                and self.attributes == other.attributes):
-
-                return True
 
         return False
 
