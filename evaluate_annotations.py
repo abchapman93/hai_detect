@@ -69,27 +69,18 @@ def compute_metrics(comparisons, categories):
         # If there is a gold annotation
         if c.has_a:
             metrics[anno_type]['true_count'] += 1
-        # If there is a comparing annotation
-        if c.has_b:
+            # If they're a correct match
+            if c.is_match:
+                metrics[anno_type]['tp'] += 1
+                metrics[anno_type]['pred_count'] += 1
+            else:
+                metrics[anno_type]['fn'] += 1
+                # Don't add one to pred_count, since this is essentially being canceled out
+                # TODO: Figure out if this is actually right
+        else: # This is a false positive
+            metrics[anno_type]['fp'] += 1
             metrics[anno_type]['pred_count'] += 1
 
-        # If they are a correct match
-        if c.is_match:
-            metrics[anno_type]['tp'] += 1
-        # If they're not, figure out what kind of error
-        # If there's a gold but not system annotation -> false negative
-        elif c.has_a and not c.has_b:
-            metrics[anno_type]['fn'] += 1
-        # If there's a system annotation but no gold -> false positive
-        elif not c.has_a and c.has_b:
-            metrics[anno_type]['fp'] += 1
-        # If there's one of each, but it's not a match -> false negative
-        elif c.has_a and c.has_b:
-            metrics[anno_type]['fn'] += 1
-       # if not c.is_match:
-       #     print(c)
-       #     print(c.has_a)
-       #     print(c.has_b)
     # Now compute precision, recall, F1
     for cat in categories:
         try:

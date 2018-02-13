@@ -202,14 +202,9 @@ class ClinicalTextDocument(object):
         annotations = self.annotations['hai_detect']
         to_exclude = ['infection', 'discharge']
         for sentence_num, sentence in enumerate(self.sentences):
-            #print(sentence)
-            #print(sentence['text'])
-            #print(type(sentence['text']))
             markup = model.markup_sentence(sentence['text'])
             targets = markup.getMarkedTargets()
 
-            # Create annotations out of targets
-            # TODO: Prune overlapping annotations
             sentence_annotations = []
             for target in targets:
                 annotation = Annotation()
@@ -241,13 +236,6 @@ class ClinicalTextDocument(object):
             # If anything else needs to be added, do it here
             first_annotation = annotations_of_classification[0]
             pruned_annotations.append(first_annotation)
-        #if self.rpt_id == "no_11049_379997247_12-02-2013_PHYSICIAN_Progress_Notes" and 'hai_detect' in self.annotations:
-            #print("Found target")
-            #print(self.annotations)
-            #print(pruned_annotations)
-            #for i, a in enumerate(pruned_annotations):
-            #    print("Annotation " + str(i))
-            #    print(a)
 
         return pruned_annotations
 
@@ -282,10 +270,7 @@ class ClinicalTextDocument(object):
                     matched_other_annotations.append(other_annotation)
                     comparison = gold_annotation.compare(other_annotation)
                     comparisons.append(comparison)
-                    if self.rpt_id == "no_110491_379997247_12-02-2013_PHYSICIAN_Progress_Notes":
-                        print("Pay Attention!")
-                        print(comparison)
-            # AnnotationComparison 2: A gold standard didn't overlap with any annotations
+           # AnnotationComparison 2: A gold standard didn't overlap with any annotations
             if not had_overlap: # If no other annotations overlapped, then there should be a false negative
 
                 empty_comparison = AnnotationComparison(a=gold_annotation, b=None)
